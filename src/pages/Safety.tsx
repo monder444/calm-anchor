@@ -1,0 +1,82 @@
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Phone, AlertTriangle, ExternalLink } from 'lucide-react';
+
+const crisisNumbers = [
+  { country: 'US', name: 'National Suicide Prevention Lifeline', number: '988' },
+  { country: 'US', name: 'Crisis Text Line', number: 'Text HOME to 741741' },
+  { country: 'UK', name: 'Samaritans', number: '116 123' },
+  { country: 'EU', name: 'European Emergency', number: '112' },
+  { country: 'INT', name: 'International Association for Suicide Prevention', number: 'https://www.iasp.info/resources/Crisis_Centres/' },
+];
+
+export default function Safety() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
+      <div className="px-6 pt-4 flex items-center gap-4 mb-6">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+        >
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </motion.button>
+        <h1 className="text-lg font-semibold text-foreground">Safety & Emergency</h1>
+      </div>
+
+      <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto">
+        {/* Disclaimer */}
+        <div className="glass rounded-2xl p-5 border border-amber/20">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-foreground text-sm mb-1">Important Notice</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Anchor AI is a support tool, not a replacement for professional mental health care. 
+                If you are in immediate danger, please contact emergency services or a crisis helpline.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Crisis Numbers */}
+        <div>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">Crisis Helplines</h3>
+          <div className="space-y-2">
+            {crisisNumbers.map((line, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="glass rounded-xl p-4 flex items-center gap-3"
+              >
+                <Phone className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-foreground">{line.name}</div>
+                  <div className="text-xs text-muted-foreground">{line.country}</div>
+                </div>
+                <span className="text-sm text-primary font-medium">{line.number}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Privacy recap */}
+        <div>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">Your Data</h3>
+          <div className="glass rounded-2xl p-5">
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>• Face video processed on-device only</li>
+              <li>• No raw biometric data leaves your phone</li>
+              <li>• Stress scores stored locally with optional encrypted sync</li>
+              <li>• Delete all data anytime from Settings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
