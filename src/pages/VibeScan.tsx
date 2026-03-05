@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
-import { ArrowLeft, Camera } from 'lucide-react';
+import { ArrowLeft, Camera, VideoOff } from 'lucide-react';
 
 const messages = [
   { time: 10, text: 'Connecting to your rhythm…' },
@@ -15,6 +15,9 @@ export default function VibeScan() {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const navigate = useNavigate();
   const app = useAppState();
 
@@ -23,12 +26,43 @@ export default function VibeScan() {
     return progress <= (next?.time ?? 31);
   })?.text || messages[0].text;
 
+  // Stop camera stream helper
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+  };
+
+  // Start scan: request camera DIRECTLY in click handler, then begin timer
+  const handleStartScan = async () => {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setScanning(true);
+    } catch (err) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setCameraError('Camera access denied. Please allow camera in your browser settings.');
+      } else {
+        setCameraError('Could not access camera. Check permissions.');
+      }
+    }
+  };
+
+  // Timer for scan progress
   useEffect(() => {
     if (!scanning) return;
     const interval = setInterval(() => {
       setProgress(p => {
         if (p >= 30) {
           clearInterval(interval);
+          stopCamera();
           const snapshot = generateMockSnapshot();
           const classification = classifyState(snapshot);
           app.setCurrentState(classification);
@@ -41,6 +75,11 @@ export default function VibeScan() {
     return () => clearInterval(interval);
   }, [scanning]);
 
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => stopCamera();
+  }, []);
+
   const state = app.currentState;
 
   return (
@@ -49,13 +88,22 @@ export default function VibeScan() {
       <div className="px-6 pt-4 flex items-center gap-4">
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => navigate(-1)}
+          onClick={() => { stopCamera(); navigate(-1); }}
           className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </motion.button>
         <h1 className="text-lg font-semibold text-foreground">VibeScan AI</h1>
       </div>
+
+      {/* Hidden video element used during scanning */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="hidden"
+      />
 
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <AnimatePresence mode="wait">
@@ -82,9 +130,15 @@ export default function VibeScan() {
               <p className="text-muted-foreground mb-8 max-w-xs">
                 Position your face within the oval. The scan takes 30 seconds.
               </p>
+              {cameraError && (
+                <div className="flex items-center gap-2 text-destructive text-sm mb-4 max-w-xs mx-auto">
+                  <VideoOff className="w-4 h-4 shrink-0" />
+                  <span>{cameraError}</span>
+                </div>
+              )}
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setScanning(true)}
+                onClick={handleStartScan}
                 className="w-full max-w-xs h-14 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg"
               >
                 Start Scan
@@ -95,6 +149,21 @@ export default function VibeScan() {
           {scanning && !done && (
             <motion.div key="scanning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
               <div className="relative w-56 h-56 mx-auto mb-8">
+                {/* Live camera feed in circle */}
+                <div className="absolute inset-10 rounded-full overflow-hidden z-10">
+                  <video
+                    ref={el => {
+                      if (el && streamRef.current) {
+                        el.srcObject = streamRef.current;
+                        el.play().catch(() => {});
+                      }
+                    }}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                </div>
                 {/* Pulse ripples */}
                 {[0, 1, 2].map((i) => (
                   <motion.div
@@ -110,14 +179,6 @@ export default function VibeScan() {
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 5, repeat: Infinity }}
                 />
-                {/* Face area */}
-                <div className="absolute inset-10 rounded-full bg-muted/30 border border-primary/20 flex items-center justify-center">
-                  <motion.div
-                    className="w-4 h-4 rounded-full bg-primary"
-                    animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                </div>
               </div>
               {/* Progress */}
               <div className="w-full max-w-xs mx-auto mb-4">
