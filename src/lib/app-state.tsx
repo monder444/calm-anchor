@@ -14,6 +14,7 @@ export interface AppState {
   sensitivity: number;
   completedWins: number;
   plantGrowth: number;
+  voiceMuted: boolean;
 }
 
 interface AppActions {
@@ -28,6 +29,7 @@ interface AppActions {
   setNotificationStyle: (s: 'haptic' | 'visual' | 'both') => void;
   setSensitivity: (n: number) => void;
   completeWin: () => void;
+  setVoiceMuted: (v: boolean) => void;
   resetOnboarding: () => void;
 }
 
@@ -44,6 +46,7 @@ const defaults: AppState = {
   sensitivity: 3,
   completedWins: 0,
   plantGrowth: 0,
+  voiceMuted: false,
 };
 
 const AppStateContext = createContext<(AppState & AppActions) | null>(null);
@@ -79,6 +82,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setNotificationStyle: (s) => update({ notificationStyle: s }),
     setSensitivity: (n) => update({ sensitivity: n }),
     completeWin: () => update({ completedWins: state.completedWins + 1, plantGrowth: Math.min(100, state.plantGrowth + 8) }),
+    setVoiceMuted: (v) => update({ voiceMuted: v }),
     resetOnboarding: () => setState({ ...defaults }),
   };
 

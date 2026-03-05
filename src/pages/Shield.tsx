@@ -2,7 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { X, Shield as ShieldIcon, Volume2 } from 'lucide-react';
+import { useSpeech } from '@/hooks/use-speech';
+import { X, Shield as ShieldIcon, Volume2, VolumeX } from 'lucide-react';
 
 const braveSteps = [
   { text: "You're safe. This is your body's alarm — it cannot hurt you.", duration: 8000 },
@@ -23,6 +24,23 @@ const groundingPrompts = [
   { text: "Take a slow breath. You are safe. You are here.", action: "I'm here" },
 ];
 
+function MuteToggle({ muted, onToggle }: { muted: boolean; onToggle: () => void }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={onToggle}
+      className="absolute top-6 left-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
+      aria-label={muted ? 'Unmute voice' : 'Mute voice'}
+    >
+      {muted ? (
+        <VolumeX className="w-5 h-5 text-muted-foreground" />
+      ) : (
+        <Volume2 className="w-5 h-5 text-primary" />
+      )}
+    </motion.button>
+  );
+}
+
 export default function ShieldPage() {
   const navigate = useNavigate();
   const app = useAppState();
@@ -38,7 +56,15 @@ export default function ShieldPage() {
 function BraveMode({ onExit }: { onExit: () => void }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [heartbeatSpeed, setHeartbeatSpeed] = useState(0.8);
+  const app = useAppState();
+  const { speak, stop } = useSpeech();
   const current = braveSteps[stepIndex];
+
+  useEffect(() => {
+    if (!app.voiceMuted) {
+      speak(current.text);
+    }
+  }, [stepIndex, app.voiceMuted]);
 
   useEffect(() => {
     if (stepIndex >= braveSteps.length) return;
@@ -51,14 +77,20 @@ function BraveMode({ onExit }: { onExit: () => void }) {
     return () => clearTimeout(timer);
   }, [stepIndex]);
 
+  const handleExit = () => {
+    stop();
+    onExit();
+  };
+
   const done = stepIndex >= braveSteps.length - 1;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
-      {/* Exit */}
+      <MuteToggle muted={app.voiceMuted} onToggle={() => { if (!app.voiceMuted) stop(); app.setVoiceMuted(!app.voiceMuted); }} />
+
       <motion.button
         whileTap={{ scale: 0.9 }}
-        onClick={onExit}
+        onClick={handleExit}
         className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
       >
         <X className="w-6 h-6 text-muted-foreground" />
@@ -105,7 +137,7 @@ function BraveMode({ onExit }: { onExit: () => void }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onExit}
+          onClick={handleExit}
           className="mt-12 h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg"
         >
           I Feel Better
@@ -117,14 +149,29 @@ function BraveMode({ onExit }: { onExit: () => void }) {
 
 function SafetyMode({ onExit }: { onExit: () => void }) {
   const [promptIndex, setPromptIndex] = useState(0);
+  const app = useAppState();
+  const { speak, stop } = useSpeech();
   const current = groundingPrompts[promptIndex];
   const done = promptIndex >= groundingPrompts.length;
 
+  useEffect(() => {
+    if (!done && !app.voiceMuted) {
+      speak(current.text);
+    }
+  }, [promptIndex, app.voiceMuted]);
+
+  const handleExit = () => {
+    stop();
+    onExit();
+  };
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
+      <MuteToggle muted={app.voiceMuted} onToggle={() => { if (!app.voiceMuted) stop(); app.setVoiceMuted(!app.voiceMuted); }} />
+
       <motion.button
         whileTap={{ scale: 0.9 }}
-        onClick={onExit}
+        onClick={handleExit}
         className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
       >
         <X className="w-6 h-6 text-muted-foreground" />
@@ -168,7 +215,7 @@ function SafetyMode({ onExit }: { onExit: () => void }) {
           <p className="text-muted-foreground mb-8">You stayed present. You did it.</p>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={onExit}
+            onClick={handleExit}
             className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg"
           >
             Return Home
