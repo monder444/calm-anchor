@@ -13,6 +13,7 @@ const microTasks = [
   { id: 'stretch', emoji: '🙆', label: 'Stretch for 1 minute', desc: 'Move what feels ready to move' },
   { id: 'breathe', emoji: '🌬️', label: 'Take 5 deep breaths', desc: 'Slow and steady' },
   { id: 'gratitude', emoji: '🙏', label: 'Name 1 good thing today', desc: 'Even the smallest counts' },
+  { id: 'meditate', emoji: '🧘', label: 'Listen to a Guided Meditation', desc: 'Free mindfulness audio', nav: '/meditations' },
 ];
 
 export default function Anchor() {
