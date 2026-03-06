@@ -83,6 +83,21 @@ export default function SettingsPage() {
           />
         </Section>
 
+        {/* Account */}
+        <Section title="Account">
+          <div className="px-4 py-3">
+            <span className="text-xs text-muted-foreground">{user?.email}</span>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => { await signOut(); navigate('/auth'); }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left"
+          >
+            <LogOut className="w-5 h-5 text-destructive-foreground" />
+            <span className="text-sm text-destructive-foreground font-medium">Sign Out</span>
+          </motion.button>
+        </Section>
+
         {/* Reset */}
         <Section title="Data">
           <motion.button
