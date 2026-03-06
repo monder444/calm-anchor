@@ -12,6 +12,7 @@ import Anchor from "./pages/Anchor";
 import Nudge from "./pages/Nudge";
 import SettingsPage from "./pages/Settings";
 import Safety from "./pages/Safety";
+import Meditations from "./pages/Meditations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function AppRoutes() {
       <Route path="/nudge" element={<Nudge />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/safety" element={<Safety />} />
+      <Route path="/meditations" element={<Meditations />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

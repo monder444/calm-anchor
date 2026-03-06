@@ -193,6 +193,7 @@ function getSuggestions(state: string) {
         { emoji: '📷', label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
         { emoji: '🌱', label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
         { emoji: '🫁', label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
+        { emoji: '🧘', label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
       ];
   }
 }
