@@ -7,6 +7,7 @@ import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, Chevr
 export default function SettingsPage() {
   const navigate = useNavigate();
   const app = useAppState();
+  const { signOut, user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
