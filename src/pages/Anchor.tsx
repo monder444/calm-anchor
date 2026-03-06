@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { ArrowLeft, Check, Sprout } from 'lucide-react';
 
-const microTasks = [
+const microTasks: { id: string; emoji: string; label: string; desc: string; nav?: string }[] = [
   { id: 'sit', emoji: '🪑', label: 'Sit up for 2 minutes', desc: 'Just change your posture gently' },
   { id: 'window', emoji: '🪟', label: 'Open a window', desc: 'Let some fresh air in' },
   { id: 'song', emoji: '🎵', label: 'Listen to 1 upbeat song', desc: 'Music can shift your energy' },
@@ -21,9 +21,13 @@ export default function Anchor() {
   const app = useAppState();
   const [completed, setCompleted] = useState<Set<string>>(new Set());
 
-  const handleComplete = (id: string) => {
-    if (completed.has(id)) return;
-    setCompleted(prev => new Set(prev).add(id));
+  const handleComplete = (task: typeof microTasks[0]) => {
+    if (task.nav) {
+      navigate(task.nav);
+      return;
+    }
+    if (completed.has(task.id)) return;
+    setCompleted(prev => new Set(prev).add(task.id));
     app.completeWin();
   };
 
@@ -88,7 +92,7 @@ export default function Anchor() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => handleComplete(task.id)}
+                onClick={() => handleComplete(task)}
                 className={`w-full glass rounded-2xl p-4 flex items-center gap-4 text-left transition-all ${
                   isDone ? 'opacity-60' : ''
                 }`}
