@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight } from 'lucide-react';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const app = useAppState();
+  const { signOut, user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
@@ -79,6 +81,21 @@ export default function SettingsPage() {
             value=""
             onClick={() => navigate('/safety')}
           />
+        </Section>
+
+        {/* Account */}
+        <Section title="Account">
+          <div className="px-4 py-3">
+            <span className="text-xs text-muted-foreground">{user?.email}</span>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => { await signOut(); navigate('/auth'); }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left"
+          >
+            <LogOut className="w-5 h-5 text-destructive-foreground" />
+            <span className="text-sm text-destructive-foreground font-medium">Sign Out</span>
+          </motion.button>
         </Section>
 
         {/* Reset */}

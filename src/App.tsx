@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppStateProvider, useAppState } from "@/lib/app-state";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
 import VibeScan from "./pages/VibeScan";
@@ -17,20 +20,36 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-muted-foreground animate-pulse">Loading…</span></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const { isOnboarded } = useAppState();
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-muted-foreground animate-pulse">Loading…</span></div>;
 
   return (
     <Routes>
-      <Route path="/" element={isOnboarded ? <Navigate to="/home" replace /> : <Onboarding />} />
-      <Route path="/home" element={isOnboarded ? <Home /> : <Navigate to="/" replace />} />
-      <Route path="/vibescan" element={<VibeScan />} />
-      <Route path="/shield" element={<ShieldPage />} />
-      <Route path="/anchor" element={<Anchor />} />
-      <Route path="/nudge" element={<Nudge />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/safety" element={<Safety />} />
-      <Route path="/meditations" element={<Meditations />} />
+      <Route path="/auth" element={user ? <Navigate to={isOnboarded ? "/home" : "/"} replace /> : <Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          {isOnboarded ? <Navigate to="/home" replace /> : <Onboarding />}
+        </ProtectedRoute>
+      } />
+      <Route path="/home" element={<ProtectedRoute>{isOnboarded ? <Home /> : <Navigate to="/" replace />}</ProtectedRoute>} />
+      <Route path="/vibescan" element={<ProtectedRoute><VibeScan /></ProtectedRoute>} />
+      <Route path="/shield" element={<ProtectedRoute><ShieldPage /></ProtectedRoute>} />
+      <Route path="/anchor" element={<ProtectedRoute><Anchor /></ProtectedRoute>} />
+      <Route path="/nudge" element={<ProtectedRoute><Nudge /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/safety" element={<ProtectedRoute><Safety /></ProtectedRoute>} />
+      <Route path="/meditations" element={<ProtectedRoute><Meditations /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -41,11 +60,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AppStateProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AppStateProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppStateProvider>
+            <AppRoutes />
+          </AppStateProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
