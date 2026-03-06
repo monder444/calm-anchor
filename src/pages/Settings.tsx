@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight } from 'lucide-react';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
