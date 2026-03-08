@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
+import { Shield, Scan, Sprout, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import BottomNav from '@/components/BottomNav';
+import { useProfile } from '@/hooks/use-profile';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import ProfileSheet from '@/components/ProfileSheet';
 
 const stateStyles = {
   panic: { bg: 'bg-amber/10', border: 'border-amber/20', text: 'text-amber', glow: 'glow-amber' },
@@ -16,7 +19,9 @@ const stateStyles = {
 export default function Home() {
   const navigate = useNavigate();
   const app = useAppState();
+  const { firstName, initials, avatarUrl } = useProfile();
   const [greeting, setGreeting] = useState('Good evening');
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -48,15 +53,20 @@ export default function Home() {
         <div>
           <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
           <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
-            Anchor AI
+            {firstName}
           </h1>
         </div>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => navigate('/settings')}
-          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
+          onClick={() => setProfileOpen(true)}
+          className="relative"
         >
-          <Settings className="w-5 h-5 text-muted-foreground" />
+          <Avatar className="w-11 h-11 border-2 border-primary/30">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+            <AvatarFallback className="bg-primary/20 text-primary text-sm font-display font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
         </motion.button>
       </div>
 
@@ -156,6 +166,7 @@ export default function Home() {
       </div>
 
       <BottomNav />
+      <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }
