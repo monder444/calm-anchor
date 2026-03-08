@@ -128,13 +128,20 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
     user-select: none;
     -webkit-user-select: none;
+    background: linear-gradient(
+      160deg,
+      hsl(var(--bg-gradient-from)) 0%,
+      hsl(var(--bg-gradient-via)) 45%,
+      hsl(var(--bg-gradient-to)) 100%
+    );
+    min-height: 100vh;
   }
 }
 
