@@ -198,15 +198,11 @@ export default function TherapistChat() {
         });
       }
 
-      // TTS for voice mode
+      // TTS for voice mode — use onEnd callback instead of timeout
       if (ttsEnabled && (mode === 'voice' || fromVoice)) {
         setVoiceState('ai-speaking');
         const plainText = assistantContent.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
-        speak(plainText);
-        // Estimate speech duration then return to idle
-        const words = plainText.split(/\s+/).length;
-        const durationMs = Math.max(2000, (words / 2.2) * 1000); // ~2.2 words/sec at 0.75 rate
-        setTimeout(() => setVoiceState('idle'), durationMs);
+        speak(plainText, () => setVoiceState('idle'));
       } else {
         setVoiceState('idle');
       }
