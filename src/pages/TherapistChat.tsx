@@ -202,7 +202,7 @@ export default function TherapistChat() {
       if (ttsEnabled && (mode === 'voice' || fromVoice)) {
         setVoiceState('ai-speaking');
         const plainText = assistantContent.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
-        speak(plainText, () => setVoiceState('idle'));
+        speak(plainText, () => setVoiceState('idle'), therapistId || 'aria');
       } else {
         setVoiceState('idle');
       }
