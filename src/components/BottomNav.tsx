@@ -16,35 +16,54 @@ export default function BottomNav() {
   const { ghostMode } = useAppState();
 
   return (
-    <div className="px-6 pb-4 relative z-10">
-      <div className="glass-strong rounded-3xl px-2 py-3 flex items-center justify-around">
+    <div className="px-5 pb-4 relative z-10">
+      <div className="glass-strong rounded-[28px] px-2 py-2.5 flex items-center justify-around">
         {navItems.map((item) => {
           const active = location.pathname === item.route;
           return (
             <motion.button
               key={item.label}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.88 }}
               onClick={() => navigate(item.route)}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-2xl transition-colors ${
-                active ? 'text-primary bg-primary/10' : 'text-muted-foreground'
-              }`}
+              className="relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl transition-all"
             >
-              <item.icon className="w-5 h-5" />
-              <span className="text-[10px] font-semibold">{ghostMode ? item.ghostLabel : item.label}</span>
+              {active && (
+                <motion.div
+                  layoutId="nav-pill"
+                  className="absolute inset-0 bg-primary/10 rounded-2xl"
+                  transition={{ type: 'spring', duration: 0.5 }}
+                />
+              )}
+              <item.icon className={`w-5 h-5 relative z-10 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`} />
+              <span className={`text-[10px] font-semibold relative z-10 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                {ghostMode ? item.ghostLabel : item.label}
+              </span>
             </motion.button>
           );
         })}
         {/* Therapist tab */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => navigate('/therapist')}
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-2xl transition-colors ${
-            location.pathname.startsWith('/therapist') ? 'text-primary bg-primary/10' : 'text-muted-foreground'
-          }`}
-        >
-          <MessageCircleHeart className="w-5 h-5" />
-          <span className="text-[10px] font-semibold">{ghostMode ? 'Chat' : 'Therapist'}</span>
-        </motion.button>
+        {(() => {
+          const active = location.pathname.startsWith('/therapist');
+          return (
+            <motion.button
+              whileTap={{ scale: 0.88 }}
+              onClick={() => navigate('/therapist')}
+              className="relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl transition-all"
+            >
+              {active && (
+                <motion.div
+                  layoutId="nav-pill"
+                  className="absolute inset-0 bg-primary/10 rounded-2xl"
+                  transition={{ type: 'spring', duration: 0.5 }}
+                />
+              )}
+              <MessageCircleHeart className={`w-5 h-5 relative z-10 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`} />
+              <span className={`text-[10px] font-semibold relative z-10 transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                {ghostMode ? 'Chat' : 'Therapist'}
+              </span>
+            </motion.button>
+          );
+        })()}
       </div>
     </div>
   );
