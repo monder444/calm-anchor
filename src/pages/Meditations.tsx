@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, Heart, SkipBack, SkipForward, Volume2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, Heart, SkipBack, SkipForward, Volume2, VolumeX, ExternalLink } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -79,6 +79,8 @@ export default function Meditations() {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [showVolume, setShowVolume] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -209,6 +211,25 @@ export default function Meditations() {
   const seekRelative = (seconds: number) => {
     if (!audioRef.current) return;
     audioRef.current.currentTime = Math.max(0, Math.min(audioRef.current.duration || 0, audioRef.current.currentTime + seconds));
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    if (audioRef.current) {
+      audioRef.current.volume = v;
+    }
+  };
+
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    if (volume > 0) {
+      audioRef.current.volume = 0;
+      setVolume(0);
+    } else {
+      audioRef.current.volume = 1;
+      setVolume(1);
+    }
   };
 
   const formatTime = (s: number) => {
@@ -347,9 +368,13 @@ export default function Meditations() {
             className="mx-4 mb-4 glass-strong rounded-3xl p-4 relative z-10"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Volume2 className="w-5 h-5 text-primary" />
-              </div>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowVolume(v => !v)}
+                className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0"
+              >
+                {volume === 0 ? <VolumeX className="w-5 h-5 text-primary" /> : <Volume2 className="w-5 h-5 text-primary" />}
+              </motion.button>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-foreground truncate">{activeMeditation.title}</div>
                 <div className="text-[10px] text-muted-foreground">
@@ -368,6 +393,32 @@ export default function Meditations() {
                 </motion.button>
               </div>
             </div>
+            <AnimatePresence>
+              {showVolume && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 pt-3 mt-3 border-t border-border/30">
+                    <motion.button whileTap={{ scale: 0.9 }} onClick={toggleMute} className="shrink-0">
+                      {volume === 0 ? <VolumeX className="w-4 h-4 text-muted-foreground" /> : <Volume2 className="w-4 h-4 text-muted-foreground" />}
+                    </motion.button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="w-full h-1.5 rounded-full appearance-none bg-muted/40 accent-primary cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+                    />
+                    <span className="text-[10px] text-muted-foreground w-8 text-right shrink-0">{Math.round(volume * 100)}%</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
