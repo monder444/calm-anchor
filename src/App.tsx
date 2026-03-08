@@ -16,6 +16,9 @@ import Nudge from "./pages/Nudge";
 import SettingsPage from "./pages/Settings";
 import Safety from "./pages/Safety";
 import Meditations from "./pages/Meditations";
+import TherapistSelect from "./pages/TherapistSelect";
+import TherapistIntro from "./pages/TherapistIntro";
+import TherapistChat from "./pages/TherapistChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +67,9 @@ function AppRoutes() {
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/safety" element={<ProtectedRoute><Safety /></ProtectedRoute>} />
       <Route path="/meditations" element={<ProtectedRoute><Meditations /></ProtectedRoute>} />
+      <Route path="/therapist" element={<ProtectedRoute><TherapistSelect /></ProtectedRoute>} />
+      <Route path="/therapist/:therapistId" element={<ProtectedRoute><TherapistIntro /></ProtectedRoute>} />
+      <Route path="/therapist/:therapistId/chat" element={<ProtectedRoute><TherapistChat /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

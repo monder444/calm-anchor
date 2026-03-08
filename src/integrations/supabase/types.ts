@@ -41,6 +41,89 @@ export type Database = {
         }
         Relationships: []
       }
+      therapist_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "therapist_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      therapist_sessions: {
+        Row: {
+          ended_at: string | null
+          id: string
+          started_at: string
+          therapist_id: string
+          topic: string | null
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          therapist_id: string
+          topic?: string | null
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          therapist_id?: string
+          topic?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_therapist_preferences: {
+        Row: {
+          id: string
+          selected_therapist_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          selected_therapist_id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          selected_therapist_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
