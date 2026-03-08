@@ -227,39 +227,57 @@ export default function TherapistChat() {
     stopSpeaking(); // Stop any ongoing TTS
 
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = true;       // Let user speak freely without cutoff
     rec.interimResults = false;
     rec.lang = 'en-US';
 
-    rec.onstart = () => setVoiceState('listening');
+    let finalTranscript = '';
+    let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    rec.onstart = () => {
+      finalTranscript = '';
+      setVoiceState('listening');
+    };
 
     rec.onresult = (e: any) => {
-      const text = e.results[0]?.[0]?.transcript;
-      setVoiceState('processing');
-      if (text) {
-        sendMessage(text, true);
-      } else {
-        setVoiceState('idle');
+      // Accumulate all final results
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript + ' ';
+        }
       }
+      // Reset silence timer — wait for user to finish speaking
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        rec.stop();
+      }, 2000); // 2s of silence = user is done
     };
 
     rec.onerror = (e: any) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
       if (e.error === 'not-allowed') {
         setVoiceState('permission-denied');
         setError('Microphone access denied. Please allow microphone in your browser settings.');
-      } else {
+      } else if (e.error !== 'aborted') {
         setVoiceState('error');
         setError('Voice recording failed. Try again or switch to text.');
       }
     };
 
     rec.onend = () => {
-      if (voiceState === 'listening') setVoiceState('idle');
+      if (silenceTimer) clearTimeout(silenceTimer);
+      const text = finalTranscript.trim();
+      if (text) {
+        setVoiceState('processing');
+        sendMessage(text, true);
+      } else {
+        setVoiceState('idle');
+      }
     };
 
     recognitionRef.current = rec;
     rec.start();
-  }, [stopSpeaking, sendMessage, voiceState]);
+  }, [stopSpeaking, sendMessage]);
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop();
