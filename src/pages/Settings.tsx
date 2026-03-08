@@ -63,6 +63,16 @@ export default function SettingsPage() {
           </div>
         </Section>
 
+        {/* Appearance */}
+        <Section title="Appearance">
+          <SettingRow
+            icon={app.theme === 'dark' ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+            label="Theme"
+            value={app.theme === 'dark' ? 'Dark' : 'Light'}
+            onClick={() => app.setTheme(app.theme === 'dark' ? 'light' : 'dark')}
+          />
+        </Section>
+
         {/* Privacy */}
         <Section title="Privacy">
           <SettingRow
