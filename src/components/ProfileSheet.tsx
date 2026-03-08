@@ -73,7 +73,7 @@ export default function ProfileSheet({ open, onClose }: ProfileSheetProps) {
               {/* Avatar */}
               <div className="relative">
                 <Avatar className="w-24 h-24 border-2 border-primary/30">
-                  {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} className="object-cover" />}
                   <AvatarFallback className="bg-primary/20 text-primary text-2xl font-display font-bold">
                     {initials}
                   </AvatarFallback>
