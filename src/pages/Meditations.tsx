@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, Heart, SkipBack, SkipForward, Volume2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, Heart, SkipBack, SkipForward, Volume2, VolumeX, ExternalLink } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
