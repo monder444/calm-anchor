@@ -102,6 +102,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
   }, [state.theme]);
 
+  // Ghost Mode: neutral browser tab title
+  useEffect(() => {
+    document.title = state.ghostMode ? 'My Notes' : 'Anchor AI';
+  }, [state.ghostMode]);
+
   return (
     <AppStateContext.Provider value={{ ...state, ...actions }}>
       {children}

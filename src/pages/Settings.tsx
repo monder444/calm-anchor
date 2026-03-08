@@ -83,6 +83,13 @@ export default function SettingsPage() {
             value={app.ghostMode ? 'On' : 'Off'}
             onClick={() => app.setGhostMode(!app.ghostMode)}
           />
+          {app.ghostMode && (
+            <div className="px-5 py-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Ghost Mode hides mental-health related labels throughout the app and changes the browser tab title to "My Notes" for privacy.
+              </p>
+            </div>
+          )}
         </Section>
 
         {/* Safety */}
