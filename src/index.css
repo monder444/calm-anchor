@@ -121,17 +121,17 @@
 
 @layer utilities {
   .glass {
-    background: hsla(237, 25%, 18%, 0.6);
+    background: hsla(var(--card), 0.6);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsla(237, 20%, 30%, 0.4);
+    border: 1px solid hsla(var(--border), 0.4);
   }
 
   .glass-strong {
-    background: hsla(237, 25%, 18%, 0.85);
+    background: hsla(var(--card), 0.85);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid hsla(237, 20%, 30%, 0.5);
+    border: 1px solid hsla(var(--border), 0.5);
   }
 
   .glow-teal {
