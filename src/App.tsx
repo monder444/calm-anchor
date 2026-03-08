@@ -67,6 +67,9 @@ function AppRoutes() {
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/safety" element={<ProtectedRoute><Safety /></ProtectedRoute>} />
       <Route path="/meditations" element={<ProtectedRoute><Meditations /></ProtectedRoute>} />
+      <Route path="/therapist" element={<ProtectedRoute><TherapistSelect /></ProtectedRoute>} />
+      <Route path="/therapist/:therapistId" element={<ProtectedRoute><TherapistIntro /></ProtectedRoute>} />
+      <Route path="/therapist/:therapistId/chat" element={<ProtectedRoute><TherapistChat /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
