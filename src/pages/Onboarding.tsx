@@ -207,35 +207,144 @@ function VibeScanIntroStep({ onNext }: { onNext: () => void }) {
 }
 
 function CalibrationStep({ step, onStep }: { step: number; onStep: () => void }) {
+  const [scanning, setScanning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const SCAN_DURATION = 8;
+
   const scans = [
-    { label: 'Baseline', desc: 'Sit comfortably and relax for a moment.', icon: '😌' },
-    { label: 'Mild Worry', desc: 'Think of a small stressor or concern.', icon: '😟' },
-    { label: 'Safe Memory', desc: 'Recall a moment when you felt completely safe.', icon: '🥰' },
+    { label: 'Baseline', desc: 'Sit comfortably and relax. We\'ll read your resting state.', icon: '😌' },
+    { label: 'Mild Worry', desc: 'Think of a small stressor or concern while we scan.', icon: '😟' },
+    { label: 'Safe Memory', desc: 'Recall a moment of complete safety and comfort.', icon: '🥰' },
   ];
   const current = scans[step];
+
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    return () => stopCamera();
+  }, [stopCamera]);
+
+  useEffect(() => {
+    if (!scanning) return;
+    setProgress(0);
+    const interval = setInterval(() => {
+      setProgress(p => {
+        if (p >= SCAN_DURATION) {
+          clearInterval(interval);
+          stopCamera();
+          setScanning(false);
+          onStep();
+          return SCAN_DURATION;
+        }
+        return p + 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [scanning, stopCamera, onStep]);
+
+  const handleStartScan = async () => {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setScanning(true);
+    } catch (err) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setCameraError('Camera access denied. Please allow camera in your browser settings.');
+      } else {
+        setCameraError('Could not access camera. Check permissions.');
+      }
+    }
+  };
+
+  const scanMessages = [
+    'Reading facial micro-expressions…',
+    'Measuring skin tone variations…',
+    'Analyzing physiological markers…',
+  ];
+  const currentMessage = scanMessages[Math.min(Math.floor(progress / 3), scanMessages.length - 1)];
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center">
       <span className="text-primary text-xs font-semibold tracking-widest uppercase mb-6">
         Calibration {step + 1}/3
       </span>
-      <div className="text-6xl mb-6">{current.icon}</div>
-      <h1 className="text-2xl font-display font-bold text-foreground mb-3">{current.label}</h1>
-      <p className="text-muted-foreground mb-10 max-w-xs leading-relaxed">{current.desc}</p>
-      <motion.div
-        className="w-20 h-20 rounded-full border-4 border-primary/30 flex items-center justify-center mb-8"
-        animate={{ scale: [1, 1.15, 1], borderColor: ['hsla(var(--primary), 0.3)', 'hsla(var(--primary), 0.6)', 'hsla(var(--primary), 0.3)'] }}
-        transition={{ duration: 4, repeat: Infinity }}
-      >
-        <div className="w-3 h-3 rounded-full bg-primary" />
-      </motion.div>
-      <motion.button
-        whileTap={{ scale: 0.97 }}
-        onClick={onStep}
-        className="w-full max-w-xs h-14 rounded-2xl btn-premium text-primary-foreground font-semibold text-lg"
-      >
-        {step < 2 ? 'Complete & Next' : 'Finish Calibration'}
-      </motion.button>
+
+      {!scanning ? (
+        <>
+          <div className="text-6xl mb-6">{current.icon}</div>
+          <h1 className="text-2xl font-display font-bold text-foreground mb-3">{current.label}</h1>
+          <p className="text-muted-foreground mb-10 max-w-xs leading-relaxed">{current.desc}</p>
+          {cameraError && (
+            <p className="text-destructive text-sm mb-4 max-w-xs">{cameraError}</p>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleStartScan}
+            className="w-full max-w-xs h-14 rounded-2xl btn-premium text-primary-foreground font-semibold text-lg"
+          >
+            Start Face Scan
+          </motion.button>
+        </>
+      ) : (
+        <>
+          <div className="relative w-44 h-44 mx-auto mb-6">
+            <div className="absolute inset-6 rounded-full overflow-hidden z-10">
+              <video
+                ref={videoRef}
+                autoPlay playsInline muted
+                className="w-full h-full object-cover scale-x-[-1]"
+              />
+            </div>
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="absolute inset-0 rounded-full border border-primary/15"
+                animate={{ scale: [1, 1.8], opacity: [0.3, 0] }}
+                transition={{ duration: 2, repeat: Infinity, delay: i * 0.6 }}
+              />
+            ))}
+            <motion.div
+              className="absolute inset-2 rounded-full border-2 border-primary/40"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            />
+          </div>
+          <div className="w-full max-w-xs mx-auto mb-4">
+            <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  width: `${(progress / SCAN_DURATION) * 100}%`,
+                  background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))',
+                }}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">{progress}s / {SCAN_DURATION}s</p>
+          <motion.p
+            key={currentMessage}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-foreground font-medium text-sm"
+          >
+            {currentMessage}
+          </motion.p>
+        </>
+      )}
     </div>
   );
 }
