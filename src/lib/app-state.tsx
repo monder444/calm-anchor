@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { MentalState, StressClassification } from './stress-engine';
 
+export type ThemeMode = 'dark' | 'light';
+
 export interface AppState {
   isOnboarded: boolean;
   primaryConcern: MentalState | null;
@@ -15,6 +17,7 @@ export interface AppState {
   completedWins: number;
   plantGrowth: number;
   voiceMuted: boolean;
+  theme: ThemeMode;
 }
 
 interface AppActions {
