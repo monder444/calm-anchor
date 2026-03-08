@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight, Wind, Footprints, Sun, type LucideIcon } from 'lucide-react';
+import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, Wind, Footprints, Sun, Brain, Heart, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import BottomNav from '@/components/BottomNav';
@@ -29,7 +29,6 @@ export default function Home() {
     else if (h < 18) setGreeting('Good afternoon');
     else setGreeting('Good evening');
 
-    // Simulate state
     if (!app.currentState) {
       const snapshot = generateMockSnapshot('baseline');
       const classification = classifyState(snapshot);
@@ -40,8 +39,6 @@ export default function Home() {
   const state = app.currentState;
   const style = state ? stateStyles[state.state] : stateStyles.baseline;
 
-  const suggestions = getSuggestions(state?.state || 'baseline');
-
   return (
     <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       {/* Ambient orbs */}
@@ -49,133 +46,149 @@ export default function Home() {
       <div className="ambient-orb w-96 h-96 bg-accent/20 -bottom-32 -left-32" />
 
       {/* Header */}
-      <div className="px-6 pt-8 pb-2 flex items-center justify-between relative z-10">
+      <div className="px-6 pt-8 pb-4 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setProfileOpen(true)}
-            className="relative"
           >
-            <Avatar className="w-16 h-16 border-2 border-primary/30">
+            <Avatar className="w-12 h-12 border-2 border-primary/20 shadow-lg">
               {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
-              <AvatarFallback className="bg-primary/20 text-primary text-lg font-display font-bold">
+              <AvatarFallback className="bg-primary/15 text-primary text-sm font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
           </motion.button>
           <div>
-            <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
-            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
-              {firstName}
+            <p className="text-muted-foreground text-xs font-medium">{greeting}</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Hello, {firstName}!
             </h1>
           </div>
         </div>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate('/settings')}
-          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
+          className="w-10 h-10 rounded-2xl glass-card flex items-center justify-center"
         >
           <Settings className="w-5 h-5 text-muted-foreground" />
         </motion.button>
       </div>
 
-      <div className="flex-1 px-6 py-5 space-y-5 overflow-y-auto relative z-10">
-        {/* State of Mind Card */}
+      <div className="flex-1 px-6 pb-3 space-y-6 overflow-y-auto relative z-10">
+        {/* Progress / State Card — gradient style matching reference */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`glass-card rounded-3xl p-6 border ${style.border}`}
+          className="gradient-card rounded-3xl p-5"
         >
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className={`w-4 h-4 ${style.text}`} />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-              {app.ghostMode ? 'Status' : 'State of Mind'}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">
+              {app.ghostMode ? 'Status' : 'Your Progress'}
             </span>
+            <Activity className={`w-4 h-4 ${style.text}`} />
           </div>
-          <h2 className={`text-2xl font-display font-bold ${style.text} mb-1.5`}>
-            {state?.label || 'Balanced'}
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {state?.description || 'You\'re in a good place right now.'}
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <h2 className={`text-xl font-bold ${style.text} mb-1`}>
+                {state?.label || 'Balanced'}
+              </h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {state?.description || 'You\'re in a good place right now.'}
+              </p>
+            </div>
+            {/* Mini stress gauge */}
+            <div className="w-14 h-14 relative">
+              <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="hsla(var(--muted), 0.3)" strokeWidth="3" />
+                <circle
+                  cx="18" cy="18" r="14" fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="3"
+                  strokeDasharray={`${(state?.stressIndex ?? 25) * 0.88} 88`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
+                {state?.stressIndex ?? 25}%
+              </span>
+            </div>
+          </div>
+          {/* Status chips */}
+          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-foreground/5">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+              {app.wearableConnected ? <Wifi className="w-3 h-3 text-primary" /> : <Wifi className="w-3 h-3" />}
+              <span>{app.wearableConnected ? 'Connected' : 'No Wearable'}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+              {app.vibeScanCalibrated ? <Check className="w-3 h-3 text-primary" /> : <Scan className="w-3 h-3" />}
+              <span>{app.vibeScanCalibrated ? 'Calibrated' : 'Uncalibrated'}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground ml-auto">
+              <Sprout className="w-3 h-3 text-primary" />
+              <span>{app.completedWins} wins</span>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Panic Button */}
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          whileHover={{ scale: 1.01 }}
-          onClick={() => navigate('/shield')}
-          className="w-full relative overflow-hidden rounded-3xl h-36 flex items-center justify-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-amber/15 via-accent/10 to-primary/15 rounded-3xl" />
-          <div className="absolute inset-0 glass-card rounded-3xl" />
-          <motion.div
-            className="absolute inset-0 rounded-3xl border border-amber/15"
-            animate={{ borderColor: ['hsla(38,95%,60%,0.15)', 'hsla(38,95%,60%,0.35)', 'hsla(38,95%,60%,0.15)'] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
-          <div className="relative flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-amber/15 flex items-center justify-center">
-              <Shield className="w-8 h-8 text-amber" />
-            </div>
-            <div className="text-left">
-              <div className="text-xl font-display font-bold text-foreground">
-                {app.ghostMode ? 'Quick Action' : 'Panic Shield'}
-              </div>
-              <div className="text-sm text-muted-foreground mt-0.5">
-                {app.ghostMode ? 'Tap to start' : 'Tap for instant support'}
-              </div>
-            </div>
-          </div>
-        </motion.button>
-
-        {/* Suggestions */}
+        {/* Category Grid — matching reference 2x2 */}
         <div>
-          <h3 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-widest">
-            Suggested for You
-          </h3>
-          <div className="space-y-3">
-            {suggestions.map((s, i) => (
+          <h3 className="text-sm font-bold text-foreground mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <CategoryCard
+              icon={Shield}
+              label={app.ghostMode ? 'Quick Action' : 'Panic Shield'}
+              color="amber"
+              delay={0.05}
+              onClick={() => navigate('/shield')}
+            />
+            <CategoryCard
+              icon={Scan}
+              label="VibeScan"
+              color="primary"
+              delay={0.1}
+              onClick={() => navigate('/vibescan')}
+            />
+            <CategoryCard
+              icon={Brain}
+              label="Meditations"
+              color="accent"
+              delay={0.15}
+              onClick={() => navigate('/meditations')}
+            />
+            <CategoryCard
+              icon={Heart}
+              label={app.ghostMode ? 'Journal' : 'Mental Health'}
+              color="secondary"
+              delay={0.2}
+              onClick={() => navigate('/therapist')}
+            />
+          </div>
+        </div>
+
+        {/* Suggested Actions */}
+        <div>
+          <h3 className="text-sm font-bold text-foreground mb-3">Suggested for You</h3>
+          <div className="space-y-2.5">
+            {getSuggestions(state?.state || 'baseline').map((s, i) => (
               <motion.button
                 key={i}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.08 }}
+                transition={{ delay: 0.25 + i * 0.06 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(s.route)}
                 className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 text-left"
               >
-                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
-                  <s.icon className="w-5 h-5 text-muted-foreground" />
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <s.icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground text-sm">{s.label}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">{s.desc}</div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </motion.button>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Status Bar */}
-      <div className="px-6 py-3 border-t border-border/50 relative z-10">
-        <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            {app.wearableConnected ? <Wifi className="w-3.5 h-3.5 text-primary" /> : <Wifi className="w-3.5 h-3.5" />}
-            <span>{app.wearableConnected ? 'Connected' : 'No Wearable'}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            {app.vibeScanCalibrated ? <Check className="w-3.5 h-3.5 text-primary" /> : <Scan className="w-3.5 h-3.5" />}
-            <span>{app.vibeScanCalibrated ? 'Calibrated' : 'Not Calibrated'}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Sprout className="w-3.5 h-3.5 text-primary" />
-            <span>{app.completedWins} wins</span>
           </div>
         </div>
       </div>
@@ -183,6 +196,36 @@ export default function Home() {
       <BottomNav />
       <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
+  );
+}
+
+function CategoryCard({
+  icon: Icon,
+  label,
+  color,
+  delay,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  color: string;
+  delay: number;
+  onClick: () => void;
+}) {
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className="glass-card rounded-3xl p-5 flex flex-col items-center gap-3 text-center aspect-square justify-center"
+    >
+      <div className={`w-12 h-12 rounded-2xl bg-${color}/12 flex items-center justify-center`}>
+        <Icon className={`w-6 h-6 text-${color}`} />
+      </div>
+      <span className="text-xs font-semibold text-foreground leading-tight">{label}</span>
+    </motion.button>
   );
 }
 
@@ -209,7 +252,7 @@ function getSuggestions(state: string): { icon: LucideIcon; label: string; desc:
         { icon: Scan, label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
         { icon: Sprout, label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
         { icon: Wind, label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
-        { icon: Activity, label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
+        { icon: Activity, label: 'Guided Meditations', desc: '5–20 minute mindfulness', route: '/meditations' },
       ];
   }
 }
