@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import type { MentalState } from '@/lib/stress-engine';
 import { Zap, Cloud, Moon, Heart, Shield, Eye, Lock, Sprout, ChevronRight, Check } from 'lucide-react';
+import WearableSetup from '@/components/WearableSetup';
 
 const steps = [
   'mission', 'pulse', 'vibescan', 'calibration', 'shield-config', 'privacy', 'first-anchor'
