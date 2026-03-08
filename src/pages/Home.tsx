@@ -166,6 +166,7 @@ export default function Home() {
       </div>
 
       <BottomNav />
+      <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }
