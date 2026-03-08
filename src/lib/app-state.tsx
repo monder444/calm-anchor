@@ -51,6 +51,7 @@ const defaults: AppState = {
   completedWins: 0,
   plantGrowth: 0,
   voiceMuted: false,
+  theme: 'dark',
 };
 
 const AppStateContext = createContext<(AppState & AppActions) | null>(null);
