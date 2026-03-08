@@ -50,23 +50,32 @@ export default function Home() {
 
       {/* Header */}
       <div className="px-6 pt-8 pb-2 flex items-center justify-between relative z-10">
-        <div>
-          <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
-          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
-            {firstName}
-          </h1>
+        <div className="flex items-center gap-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setProfileOpen(true)}
+            className="relative"
+          >
+            <Avatar className="w-16 h-16 border-2 border-primary/30">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+              <AvatarFallback className="bg-primary/20 text-primary text-lg font-display font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </motion.button>
+          <div>
+            <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
+            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
+              {firstName}
+            </h1>
+          </div>
         </div>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => setProfileOpen(true)}
-          className="relative"
+          onClick={() => navigate('/settings')}
+          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
         >
-          <Avatar className="w-11 h-11 border-2 border-primary/30">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
-            <AvatarFallback className="bg-primary/20 text-primary text-sm font-display font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <Settings className="w-5 h-5 text-muted-foreground" />
         </motion.button>
       </div>
 
