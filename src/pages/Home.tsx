@@ -5,8 +5,6 @@ import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight } f
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import BottomNav from '@/components/BottomNav';
-import { useEffect, useState } from 'react';
-import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 
 const stateStyles = {
   panic: { bg: 'bg-amber/10', border: 'border-amber/20', text: 'text-amber', glow: 'glow-amber' },
