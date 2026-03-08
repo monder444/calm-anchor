@@ -2,18 +2,19 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { ArrowLeft, Check, Sprout } from 'lucide-react';
+import { ArrowLeft, Check, Sprout, Armchair, Wind as WindIcon, Music, Sun, Droplets, StretchHorizontal, Heart, Headphones } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const microTasks: { id: string; emoji: string; label: string; desc: string; nav?: string }[] = [
-  { id: 'sit', emoji: '🪑', label: 'Sit up for 2 minutes', desc: 'Just change your posture gently' },
-  { id: 'window', emoji: '🪟', label: 'Open a window', desc: 'Let some fresh air in' },
-  { id: 'song', emoji: '🎵', label: 'Listen to 1 upbeat song', desc: 'Music can shift your energy' },
-  { id: 'sunlight', emoji: '☀️', label: '1-minute sunlight', desc: 'Step near a window or outside' },
-  { id: 'water', emoji: '💧', label: 'Drink a glass of water', desc: 'Hydration helps everything' },
-  { id: 'stretch', emoji: '🙆', label: 'Stretch for 1 minute', desc: 'Move what feels ready to move' },
-  { id: 'breathe', emoji: '🌬️', label: 'Take 5 deep breaths', desc: 'Slow and steady' },
-  { id: 'gratitude', emoji: '🙏', label: 'Name 1 good thing today', desc: 'Even the smallest counts' },
-  { id: 'meditate', emoji: '🧘', label: 'Listen to a Guided Meditation', desc: 'Free mindfulness audio', nav: '/meditations' },
+const microTasks: { id: string; icon: LucideIcon; label: string; desc: string; nav?: string }[] = [
+  { id: 'sit', icon: Armchair, label: 'Sit up for 2 minutes', desc: 'Just change your posture gently' },
+  { id: 'window', icon: WindIcon, label: 'Open a window', desc: 'Let some fresh air in' },
+  { id: 'song', icon: Music, label: 'Listen to 1 upbeat song', desc: 'Music can shift your energy' },
+  { id: 'sunlight', icon: Sun, label: '1-minute sunlight', desc: 'Step near a window or outside' },
+  { id: 'water', icon: Droplets, label: 'Drink a glass of water', desc: 'Hydration helps everything' },
+  { id: 'stretch', icon: StretchHorizontal, label: 'Stretch for 1 minute', desc: 'Move what feels ready to move' },
+  { id: 'breathe', icon: WindIcon, label: 'Take 5 deep breaths', desc: 'Slow and steady' },
+  { id: 'gratitude', icon: Heart, label: 'Name 1 good thing today', desc: 'Even the smallest counts' },
+  { id: 'meditate', icon: Headphones, label: 'Listen to a Guided Meditation', desc: 'Free mindfulness audio', nav: '/meditations' },
 ];
 
 export default function Anchor() {
@@ -104,7 +105,7 @@ export default function Anchor() {
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg ${
                   isDone ? 'bg-primary/15' : 'bg-muted/50'
                 }`}>
-                  {isDone ? <Check className="w-5 h-5 text-primary" /> : task.emoji}
+                  {isDone ? <Check className="w-5 h-5 text-primary" /> : <task.icon className="w-5 h-5 text-muted-foreground" />}
                 </div>
                 <div className="flex-1">
                   <div className={`font-semibold text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
