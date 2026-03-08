@@ -13,7 +13,29 @@ export default function Auth() {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, resetPassword } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      if (result?.error) {
+        toast.error(result.error.message || 'Google sign-in failed');
+      }
+    } catch (err: any) {
+      if (err?.message?.includes('cancelled') || err?.message?.includes('popup_closed')) {
+        toast.info('Sign-in cancelled');
+      } else {
+        toast.error(err?.message || 'Google sign-in failed');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
