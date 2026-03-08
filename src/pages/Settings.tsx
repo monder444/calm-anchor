@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon } from 'lucide-react';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -61,6 +61,16 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+        </Section>
+
+        {/* Appearance */}
+        <Section title="Appearance">
+          <SettingRow
+            icon={app.theme === 'dark' ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+            label="Theme"
+            value={app.theme === 'dark' ? 'Dark' : 'Light'}
+            onClick={() => app.setTheme(app.theme === 'dark' ? 'light' : 'dark')}
+          />
         </Section>
 
         {/* Privacy */}

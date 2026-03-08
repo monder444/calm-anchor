@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { MentalState, StressClassification } from './stress-engine';
 
+export type ThemeMode = 'dark' | 'light';
+
 export interface AppState {
   isOnboarded: boolean;
   primaryConcern: MentalState | null;
@@ -15,6 +17,7 @@ export interface AppState {
   completedWins: number;
   plantGrowth: number;
   voiceMuted: boolean;
+  theme: ThemeMode;
 }
 
 interface AppActions {
@@ -30,6 +33,7 @@ interface AppActions {
   setSensitivity: (n: number) => void;
   completeWin: () => void;
   setVoiceMuted: (v: boolean) => void;
+  setTheme: (t: ThemeMode) => void;
   resetOnboarding: () => void;
 }
 
@@ -47,6 +51,7 @@ const defaults: AppState = {
   completedWins: 0,
   plantGrowth: 0,
   voiceMuted: false,
+  theme: 'dark',
 };
 
 const AppStateContext = createContext<(AppState & AppActions) | null>(null);
@@ -83,8 +88,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setSensitivity: (n) => update({ sensitivity: n }),
     completeWin: () => update({ completedWins: state.completedWins + 1, plantGrowth: Math.min(100, state.plantGrowth + 8) }),
     setVoiceMuted: (v) => update({ voiceMuted: v }),
+    setTheme: (t) => update({ theme: t }),
     resetOnboarding: () => setState({ ...defaults }),
   };
+
+  // Apply theme class to document root
+  useEffect(() => {
+    const root = document.documentElement;
+    if (state.theme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+  }, [state.theme]);
 
   return (
     <AppStateContext.Provider value={{ ...state, ...actions }}>
