@@ -206,6 +206,13 @@ export default function Home() {
   );
 }
 
+const categoryGradients: Record<string, string> = {
+  amber: 'radial-gradient(ellipse at 50% 120%, hsla(38, 95%, 60%, 0.35) 0%, hsla(38, 80%, 50%, 0.12) 40%, transparent 70%)',
+  primary: 'radial-gradient(ellipse at 50% 120%, hsla(258, 72%, 62%, 0.35) 0%, hsla(258, 60%, 55%, 0.12) 40%, transparent 70%)',
+  accent: 'radial-gradient(ellipse at 50% 120%, hsla(275, 65%, 58%, 0.35) 0%, hsla(270, 50%, 50%, 0.12) 40%, transparent 70%)',
+  secondary: 'radial-gradient(ellipse at 50% 120%, hsla(230, 55%, 52%, 0.35) 0%, hsla(230, 45%, 45%, 0.12) 40%, transparent 70%)',
+};
+
 function CategoryCard({
   icon: Icon,
   label,
@@ -226,12 +233,17 @@ function CategoryCard({
       transition={{ delay }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="glass-card rounded-3xl p-5 flex flex-col items-center gap-3 text-center aspect-square justify-center"
+      className="glass-card rounded-3xl p-5 flex flex-col items-center gap-3 text-center aspect-square justify-center relative overflow-hidden"
     >
-      <div className={`w-12 h-12 rounded-2xl bg-${color}/12 flex items-center justify-center`}>
+      {/* Radial glow background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: categoryGradients[color] || categoryGradients.primary }}
+      />
+      <div className={`w-12 h-12 rounded-2xl bg-${color}/12 flex items-center justify-center relative z-10`}>
         <Icon className={`w-6 h-6 text-${color}`} />
       </div>
-      <span className="text-xs font-semibold text-foreground leading-tight">{label}</span>
+      <span className="text-xs font-semibold text-foreground leading-tight relative z-10">{label}</span>
     </motion.button>
   );
 }
