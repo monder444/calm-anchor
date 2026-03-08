@@ -20,13 +20,14 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: `${window.location.origin}/auth`,
-      });
+      console.log('[GoogleAuth] Starting OAuth flow...');
+      const result = await lovable.auth.signInWithOAuth('google');
+      console.log('[GoogleAuth] Result:', JSON.stringify(result, null, 2));
       if (result?.error) {
         toast.error(result.error.message || 'Google sign-in failed');
       }
     } catch (err: any) {
+      console.error('[GoogleAuth] Error:', err);
       if (err?.message?.includes('cancelled') || err?.message?.includes('popup_closed')) {
         toast.info('Sign-in cancelled');
       } else {
