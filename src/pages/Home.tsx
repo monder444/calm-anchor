@@ -148,8 +148,8 @@ export default function Home() {
                 onClick={() => navigate(s.route)}
                 className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 text-left"
               >
-                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center text-lg">
-                  {s.emoji}
+                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
+                  <s.icon className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground text-sm">{s.label}</div>
