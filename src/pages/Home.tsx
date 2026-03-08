@@ -62,7 +62,7 @@ export default function Home() {
           <div>
             <p className="text-muted-foreground text-xs font-medium">{greeting}</p>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Hello, {firstName}!
+              {firstName}
             </h1>
           </div>
         </div>
