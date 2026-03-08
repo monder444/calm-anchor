@@ -6,14 +6,14 @@ import { useSpeech } from '@/hooks/use-speech';
 import { X, Shield as ShieldIcon, Volume2, VolumeX } from 'lucide-react';
 
 const braveSteps = [
-  { text: "You're safe. This is your body's alarm — it cannot hurt you.", duration: 8000 },
-  { text: "Allow the sensations. Don't fight them. Let the wave rise.", duration: 8000 },
-  { text: "Breathe in slowly… 4 seconds…", duration: 5000 },
-  { text: "Hold gently… 4 seconds…", duration: 5000 },
-  { text: "Breathe out slowly… 6 seconds…", duration: 7000 },
-  { text: "Good. The wave is passing. You are still here.", duration: 8000 },
-  { text: "Notice your feet on the ground. You are anchored.", duration: 8000 },
-  { text: "One more breath. You're doing beautifully.", duration: 6000 },
+  { text: "Hey… you're safe. This is just your body's alarm — it can't hurt you.", duration: 9000 },
+  { text: "Let the feelings be there. Don't fight them. Let the wave rise gently.", duration: 9000 },
+  { text: "Now breathe in with me… slowly… four seconds…", duration: 6000 },
+  { text: "Hold it softly… four seconds…", duration: 5000 },
+  { text: "And breathe out… nice and slow… six seconds…", duration: 7000 },
+  { text: "Good. The wave is already passing. You're still here.", duration: 8000 },
+  { text: "Feel your feet on the ground. You are anchored, right here.", duration: 8000 },
+  { text: "One more gentle breath. You're doing so well.", duration: 7000 },
 ];
 
 const groundingPrompts = [
