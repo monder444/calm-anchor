@@ -53,15 +53,20 @@ export default function Home() {
         <div>
           <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
           <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
-            Anchor AI
+            {firstName}
           </h1>
         </div>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => navigate('/settings')}
-          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
+          onClick={() => setProfileOpen(true)}
+          className="relative"
         >
-          <Settings className="w-5 h-5 text-muted-foreground" />
+          <Avatar className="w-11 h-11 border-2 border-primary/30">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+            <AvatarFallback className="bg-primary/20 text-primary text-sm font-display font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
         </motion.button>
       </div>
 
