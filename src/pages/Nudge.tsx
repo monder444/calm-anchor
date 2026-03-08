@@ -38,7 +38,7 @@ export default function Nudge() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-72 h-72 bg-accent/15 -top-20 -left-20" />
       <div className="ambient-orb w-64 h-64 bg-primary/15 bottom-20 -right-20" />
 

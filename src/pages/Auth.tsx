@@ -65,7 +65,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="ambient-orb w-80 h-80 bg-primary/30 -top-24 -right-24" />
       <div className="ambient-orb w-96 h-96 bg-accent/20 -bottom-40 -left-40" />

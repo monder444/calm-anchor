@@ -47,7 +47,7 @@ export default function ShieldPage() {
   const mode = app.shieldMode;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-96 h-96 bg-amber/15 top-1/4 -right-32" />
       <div className="ambient-orb w-72 h-72 bg-primary/15 -bottom-20 -left-20" />
       {mode === 'brave' ? <BraveMode onExit={() => navigate('/home')} /> : <SafetyMode onExit={() => navigate('/home')} />}

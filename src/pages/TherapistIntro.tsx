@@ -27,7 +27,7 @@ export default function TherapistIntro() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-80 h-80 bg-primary/20 -top-24 right-0" />
       <div className="ambient-orb w-72 h-72 bg-accent/15 bottom-32 -left-24" />
 

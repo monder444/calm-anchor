@@ -14,7 +14,7 @@ export default function Safety() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-72 h-72 bg-amber/10 -top-20 -right-20" />
 
       <div className="px-6 pt-6 flex items-center gap-4 mb-6 relative z-10">

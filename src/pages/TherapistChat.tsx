@@ -324,7 +324,7 @@ export default function TherapistChat() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-64 h-64 bg-primary/15 -top-16 -right-16" />
       <div className="ambient-orb w-56 h-56 bg-accent/10 bottom-24 -left-20" />
 
