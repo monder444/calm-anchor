@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { Shield, Scan, Sprout, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
+import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import BottomNav from '@/components/BottomNav';
