@@ -102,7 +102,7 @@ export default function TherapistChat() {
     }
     // Speak greeting in voice mode
     if (startInVoiceMode && ttsEnabled) {
-      speak(greeting.replace(/\*\*/g, ''));
+      speak(greeting.replace(/\*\*/g, ''), undefined, therapistId || 'aria');
     }
   };
 
@@ -202,7 +202,7 @@ export default function TherapistChat() {
       if (ttsEnabled && (mode === 'voice' || fromVoice)) {
         setVoiceState('ai-speaking');
         const plainText = assistantContent.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
-        speak(plainText, () => setVoiceState('idle'));
+        speak(plainText, () => setVoiceState('idle'), therapistId || 'aria');
       } else {
         setVoiceState('idle');
       }
@@ -319,7 +319,7 @@ export default function TherapistChat() {
     if (latestAssistantRef.current && ttsEnabled) {
       const plainText = latestAssistantRef.current.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
       setVoiceState('ai-speaking');
-      speak(plainText, () => setVoiceState('idle'));
+      speak(plainText, () => setVoiceState('idle'), therapistId || 'aria');
     }
   };
 
