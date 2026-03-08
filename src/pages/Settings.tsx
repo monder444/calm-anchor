@@ -28,12 +28,26 @@ export default function SettingsPage() {
       <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto relative z-10">
         {/* Shield Mode */}
         <Section title="Crisis Settings">
-          <SettingRow
-            icon={<Shield className="w-5 h-5 text-primary" />}
-            label="Shield Mode"
-            value={app.shieldMode === 'brave' ? 'Brave Voice' : 'Grounding Guide'}
-            onClick={() => app.setShieldMode(app.shieldMode === 'brave' ? 'safety' : 'brave')}
-          />
+          <div className="flex items-center">
+            <SettingRow
+              icon={<Shield className="w-5 h-5 text-primary" />}
+              label="Shield Mode"
+              value={app.shieldMode === 'brave' ? 'Brave Voice' : 'Grounding Guide'}
+              onClick={() => app.setShieldMode(app.shieldMode === 'brave' ? 'safety' : 'brave')}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="pr-4 -ml-2">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground/60" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-[220px] text-xs">
+                {app.shieldMode === 'brave'
+                  ? 'Brave Voice uses calming CBT-inspired audio guidance to help you ride through a panic episode.'
+                  : 'Grounding Guide walks you through AR-style exercises to anchor yourself using your surroundings.'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </Section>
 
         {/* Notifications */}
