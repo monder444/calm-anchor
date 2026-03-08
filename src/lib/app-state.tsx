@@ -33,6 +33,7 @@ interface AppActions {
   setSensitivity: (n: number) => void;
   completeWin: () => void;
   setVoiceMuted: (v: boolean) => void;
+  setTheme: (t: ThemeMode) => void;
   resetOnboarding: () => void;
 }
 
