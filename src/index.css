@@ -61,9 +61,9 @@
     --surface-glass: 245 22% 13%;
 
     /* Gradient backgrounds — rich purple-indigo shift */
-    --bg-gradient-from: 240 24% 8%;
-    --bg-gradient-via: 258 28% 12%;
-    --bg-gradient-to: 275 22% 10%;
+    --bg-gradient-from: 240 26% 7%;
+    --bg-gradient-via: 258 32% 13%;
+    --bg-gradient-to: 275 28% 9%;
   }
 
   .light {
