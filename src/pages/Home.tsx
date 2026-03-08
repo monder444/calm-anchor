@@ -240,8 +240,8 @@ function CategoryCard({
         className="absolute inset-0 pointer-events-none"
         style={{ background: categoryGradients[color] || categoryGradients.primary }}
       />
-      <div className={`w-12 h-12 rounded-2xl bg-${color}/12 flex items-center justify-center relative z-10`}>
-        <Icon className={`w-6 h-6 text-${color}`} />
+      <div className={`w-16 h-16 rounded-2xl bg-${color}/12 flex items-center justify-center relative z-10`}>
+        <Icon className={`w-8 h-8 text-${color}`} />
       </div>
       <span className="text-xs font-semibold text-foreground leading-tight relative z-10">{label}</span>
     </motion.button>
