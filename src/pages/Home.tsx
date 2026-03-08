@@ -19,7 +19,9 @@ const stateStyles = {
 export default function Home() {
   const navigate = useNavigate();
   const app = useAppState();
+  const { firstName, initials, avatarUrl } = useProfile();
   const [greeting, setGreeting] = useState('Good evening');
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const h = new Date().getHours();
