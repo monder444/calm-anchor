@@ -70,8 +70,8 @@ export default function Nudge() {
                 className="w-full glass-card rounded-3xl p-6 text-left"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl">
-                    {card.emoji}
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <card.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-foreground">{card.title}</div>
