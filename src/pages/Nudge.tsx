@@ -121,7 +121,9 @@ function ActiveCopingCard({ card, onClose }: { card: typeof copingCards[0]; onCl
       className="glass-card rounded-3xl p-6 glow-primary"
     >
       <div className="flex items-center gap-3 mb-5">
-        <span className="text-2xl">{card.emoji}</span>
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <card.icon className="w-5 h-5 text-primary" />
+        </div>
         <h3 className="font-semibold text-foreground flex-1 font-display">{card.title}</h3>
         <button onClick={onClose} className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">Close</button>
       </div>
