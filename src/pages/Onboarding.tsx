@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import type { MentalState } from '@/lib/stress-engine';
 import { Zap, Cloud, Moon, Heart, Shield, Eye, Lock, Sprout, ChevronRight, Check } from 'lucide-react';
+import WearableSetup from '@/components/WearableSetup';
 
 const steps = [
   'mission', 'pulse', 'vibescan', 'calibration', 'shield-config', 'privacy', 'first-anchor'
@@ -68,7 +69,10 @@ export default function Onboarding() {
             <MissionStep onSelect={(concern) => { app.setPrimaryConcern(concern); next(); }} />
           )}
           {currentStep === 'pulse' && (
-            <PulseStep onNext={() => { app.setWearableConnected(true); next(); }} onSkip={next} />
+            <WearableSetup
+              onComplete={(connected) => { app.setWearableConnected(connected); next(); }}
+              showSkip
+            />
           )}
           {currentStep === 'vibescan' && (
             <VibeScanIntroStep onNext={next} />
@@ -138,36 +142,6 @@ function MissionStep({ onSelect }: { onSelect: (c: MentalState) => void }) {
   );
 }
 
-function PulseStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center text-center">
-      <motion.div
-        className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center mb-8"
-        animate={{ scale: [1, 1.08, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <Heart className="w-12 h-12 text-primary" />
-      </motion.div>
-      <h1 className="text-3xl font-display font-bold text-foreground mb-3 tracking-tight">Connect Your Pulse</h1>
-      <p className="text-muted-foreground mb-2 max-w-xs leading-relaxed">
-        Connect a wearable to enable continuous heart rate and HRV-based stress detection.
-      </p>
-      <p className="text-sm text-muted-foreground mb-10 max-w-xs">
-        Supports Apple Health, Google Fit, Oura, Fitbit, and more.
-      </p>
-      <motion.button
-        whileTap={{ scale: 0.97 }}
-        onClick={onNext}
-        className="w-full max-w-xs h-14 rounded-2xl btn-premium text-primary-foreground font-semibold text-lg mb-4"
-      >
-        Connect Wearable
-      </motion.button>
-      <button onClick={onSkip} className="text-muted-foreground text-sm font-medium hover:text-foreground transition-colors">
-        Skip for now
-      </button>
-    </div>
-  );
-}
 
 function VibeScanIntroStep({ onNext }: { onNext: () => void }) {
   return (

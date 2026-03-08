@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon, Info } from 'lucide-react';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon, Info, Watch } from 'lucide-react';
+import WearableSetup from '@/components/WearableSetup';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function SettingsPage() {
@@ -85,6 +86,11 @@ export default function SettingsPage() {
                'Maximum — reacts to the subtlest changes, may alert more often'}
             </p>
           </div>
+        </Section>
+
+        {/* Wearable */}
+        <Section title="Wearable">
+          <WearableSetup onComplete={(c) => app.setWearableConnected(c)} showSkip={false} compact />
         </Section>
 
         {/* Appearance */}
