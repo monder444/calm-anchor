@@ -29,15 +29,16 @@ export function useSpeech() {
     utterRef.current = null;
   }, []);
 
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, onEnd?: () => void) => {
     if (!window.speechSynthesis) return;
     stop();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.75;   // slower = calmer
-    utter.pitch = 0.85;  // slightly lower = warmer
-    utter.volume = 0.9;  // just under max to feel gentler
+    utter.rate = 1.05;   // slightly faster = more dynamic & enthusiastic
+    utter.pitch = 1.1;   // higher pitch = more vivid & expressive
+    utter.volume = 1.0;  // full volume for clarity
     const voice = pickVoice();
     if (voice) utter.voice = voice;
+    if (onEnd) utter.onend = onEnd;
     utterRef.current = utter;
     window.speechSynthesis.speak(utter);
   }, [stop]);
