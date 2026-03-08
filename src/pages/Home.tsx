@@ -157,29 +157,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom Nav */}
-      <div className="px-6 pb-4 relative z-10">
-        <div className="glass-strong rounded-3xl px-4 py-3 flex items-center justify-around">
-          {[
-            { icon: '🏠', label: 'Home', route: '/home', active: true },
-            { icon: '📷', label: 'Scan', route: '/vibescan', active: false },
-            { icon: '🌱', label: 'Anchor', route: '/anchor', active: false },
-            { icon: '💭', label: 'Nudge', route: '/nudge', active: false },
-          ].map((item) => (
-            <motion.button
-              key={item.label}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate(item.route)}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-2xl transition-colors ${
-                item.active ? 'text-primary bg-primary/10' : 'text-muted-foreground'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="text-[10px] font-semibold">{item.label}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
+      <BottomNav />
     </div>
   );
 }
