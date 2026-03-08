@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
+import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight, Wind, Footprints, Sun, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import BottomNav from '@/components/BottomNav';
@@ -148,8 +148,8 @@ export default function Home() {
                 onClick={() => navigate(s.route)}
                 className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 text-left"
               >
-                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center text-lg">
-                  {s.emoji}
+                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
+                  <s.icon className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground text-sm">{s.label}</div>
@@ -186,30 +186,30 @@ export default function Home() {
   );
 }
 
-function getSuggestions(state: string) {
+function getSuggestions(state: string): { icon: LucideIcon; label: string; desc: string; route: string }[] {
   switch (state) {
     case 'panic':
       return [
-        { emoji: '🛡️', label: 'Activate Shield', desc: 'Immediate grounding support', route: '/shield' },
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Check your stress markers', route: '/vibescan' },
+        { icon: Shield, label: 'Activate Shield', desc: 'Immediate grounding support', route: '/shield' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Check your stress markers', route: '/vibescan' },
       ];
     case 'anxiety':
       return [
-        { emoji: '🫁', label: '2-min Box Breathing', desc: 'Calm your nervous system', route: '/nudge' },
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Monitor your state', route: '/vibescan' },
-        { emoji: '🚶', label: '5-minute Walk', desc: 'Gentle movement helps', route: '/nudge' },
+        { icon: Wind, label: '2-min Box Breathing', desc: 'Calm your nervous system', route: '/nudge' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Monitor your state', route: '/vibescan' },
+        { icon: Footprints, label: '5-minute Walk', desc: 'Gentle movement helps', route: '/nudge' },
       ];
     case 'depression':
       return [
-        { emoji: '🌱', label: '1% Win', desc: 'One small step forward', route: '/anchor' },
-        { emoji: '☀️', label: '1-min Sunlight', desc: 'A tiny dose of light', route: '/anchor' },
+        { icon: Sprout, label: '1% Win', desc: 'One small step forward', route: '/anchor' },
+        { icon: Sun, label: '1-min Sunlight', desc: 'A tiny dose of light', route: '/anchor' },
       ];
     default:
       return [
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
-        { emoji: '🌱', label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
-        { emoji: '🫁', label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
-        { emoji: '🧘', label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
+        { icon: Sprout, label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
+        { icon: Wind, label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
+        { icon: Activity, label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
       ];
   }
 }
