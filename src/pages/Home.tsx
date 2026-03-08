@@ -186,30 +186,30 @@ export default function Home() {
   );
 }
 
-function getSuggestions(state: string) {
+function getSuggestions(state: string): { icon: LucideIcon; label: string; desc: string; route: string }[] {
   switch (state) {
     case 'panic':
       return [
-        { emoji: '🛡️', label: 'Activate Shield', desc: 'Immediate grounding support', route: '/shield' },
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Check your stress markers', route: '/vibescan' },
+        { icon: Shield, label: 'Activate Shield', desc: 'Immediate grounding support', route: '/shield' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Check your stress markers', route: '/vibescan' },
       ];
     case 'anxiety':
       return [
-        { emoji: '🫁', label: '2-min Box Breathing', desc: 'Calm your nervous system', route: '/nudge' },
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Monitor your state', route: '/vibescan' },
-        { emoji: '🚶', label: '5-minute Walk', desc: 'Gentle movement helps', route: '/nudge' },
+        { icon: Wind, label: '2-min Box Breathing', desc: 'Calm your nervous system', route: '/nudge' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Monitor your state', route: '/vibescan' },
+        { icon: Footprints, label: '5-minute Walk', desc: 'Gentle movement helps', route: '/nudge' },
       ];
     case 'depression':
       return [
-        { emoji: '🌱', label: '1% Win', desc: 'One small step forward', route: '/anchor' },
-        { emoji: '☀️', label: '1-min Sunlight', desc: 'A tiny dose of light', route: '/anchor' },
+        { icon: Sprout, label: '1% Win', desc: 'One small step forward', route: '/anchor' },
+        { icon: Sun, label: '1-min Sunlight', desc: 'A tiny dose of light', route: '/anchor' },
       ];
     default:
       return [
-        { emoji: '📷', label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
-        { emoji: '🌱', label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
-        { emoji: '🫁', label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
-        { emoji: '🧘', label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
+        { icon: Scan, label: 'Run VibeScan', desc: 'Quick stress check', route: '/vibescan' },
+        { icon: Sprout, label: 'Complete a 1% Win', desc: 'Keep your streak going', route: '/anchor' },
+        { icon: Wind, label: 'Box Breathing', desc: '2-minute calm exercise', route: '/nudge' },
+        { icon: Activity, label: 'Guided Meditations', desc: '5–20 minute mindfulness practices', route: '/meditations' },
       ];
   }
 }
