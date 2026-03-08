@@ -5,7 +5,7 @@ import { useAppState } from '@/lib/app-state';
 
 const navItems: { icon: LucideIcon; label: string; ghostLabel: string; route: string }[] = [
   { icon: Home, label: 'Home', ghostLabel: 'Home', route: '/home' },
-  { icon: Scan, label: 'Scan', ghostLabel: 'Camera', route: '/vibescan' },
+  { icon: Scan, label: 'Scan', ghostLabel: 'Scan', route: '/vibescan' },
   { icon: Sprout, label: 'Anchor', ghostLabel: 'Tasks', route: '/anchor' },
   { icon: MessageSquare, label: 'Nudge', ghostLabel: 'Notes', route: '/nudge' },
 ];
