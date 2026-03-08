@@ -61,7 +61,7 @@ export default function VibeScan() {
           clearInterval(interval);
           stopCamera();
           const snapshot = generateMockSnapshot();
-          const classification = classifyState(snapshot);
+          const classification = classifyState(snapshot, undefined, undefined, app.sensitivity);
           app.setCurrentState(classification);
           setDone(true);
           return 30;
