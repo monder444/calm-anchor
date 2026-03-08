@@ -102,7 +102,7 @@ export default function TherapistChat() {
     }
     // Speak greeting in voice mode
     if (startInVoiceMode && ttsEnabled) {
-      speak(greeting.replace(/\*\*/g, ''));
+      speak(greeting.replace(/\*\*/g, ''), undefined, therapistId || 'aria');
     }
   };
 
