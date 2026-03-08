@@ -2,15 +2,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
+import { useSpeech } from '@/hooks/use-speech';
 import { supabase } from '@/integrations/supabase/client';
 import { getTherapist } from '@/lib/therapists';
-import { ArrowLeft, Send, Mic, MicOff, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Send, Mic, MicOff, X, AlertTriangle, Keyboard, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  fromVoice?: boolean;
 }
+
+type VoiceState = 'idle' | 'listening' | 'processing' | 'ai-responding' | 'ai-speaking' | 'error' | 'permission-denied';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/therapist-chat`;
 
@@ -19,17 +23,22 @@ export default function TherapistChat() {
   const { therapistId } = useParams<{ therapistId: string }>();
   const location = useLocation();
   const { user } = useAuth();
+  const { speak, stop: stopSpeaking } = useSpeech();
   const therapist = getTherapist(therapistId || 'aria');
   const topic = (location.state as any)?.topic || null;
+  const startInVoiceMode = (location.state as any)?.voiceMode || false;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'text' | 'voice'>(startInVoiceMode ? 'voice' : 'text');
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [ttsEnabled, setTtsEnabled] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const latestAssistantRef = useRef<string>('');
 
   // Load or create session
   useEffect(() => {
@@ -37,9 +46,13 @@ export default function TherapistChat() {
     loadSession();
   }, [user, therapistId]);
 
+  // Stop TTS on unmount
+  useEffect(() => {
+    return () => { stopSpeaking(); };
+  }, [stopSpeaking]);
+
   const loadSession = async () => {
     if (!user) return;
-    // Find most recent open session for this therapist
     const { data: sessions } = await supabase
       .from('therapist_sessions')
       .select('id')
@@ -52,7 +65,6 @@ export default function TherapistChat() {
     if (sessions && sessions.length > 0) {
       const sid = sessions[0].id;
       setSessionId(sid);
-      // Load messages
       const { data: msgs } = await supabase
         .from('therapist_messages')
         .select('role, content')
@@ -62,11 +74,9 @@ export default function TherapistChat() {
       if (msgs && msgs.length > 0) {
         setMessages(msgs.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })));
       } else if (topic) {
-        // New session with topic: send initial greeting
         sendInitialGreeting(sid);
       }
     } else {
-      // Create new session
       const { data: newSession } = await supabase
         .from('therapist_sessions')
         .insert({ user_id: user.id, therapist_id: therapistId || 'aria', topic })
@@ -80,20 +90,19 @@ export default function TherapistChat() {
   };
 
   const sendInitialGreeting = (sid: string) => {
-    // Show therapist greeting as first message
     const greeting = topic
       ? `${therapist.greeting} I see you'd like to talk about **${topic}**. I'm here for you — take your time.`
       : `${therapist.greeting} What would you like to explore today?`;
     const msg: Message = { role: 'assistant', content: greeting };
     setMessages([msg]);
-    // Persist
     if (user) {
       supabase.from('therapist_messages').insert({
-        session_id: sid,
-        user_id: user.id,
-        role: 'assistant',
-        content: greeting,
+        session_id: sid, user_id: user.id, role: 'assistant', content: greeting,
       });
+    }
+    // Speak greeting in voice mode
+    if (startInVoiceMode && ttsEnabled) {
+      speak(greeting.replace(/\*\*/g, ''));
     }
   };
 
@@ -102,28 +111,26 @@ export default function TherapistChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (text: string, fromVoice = false) => {
     if (!text.trim() || isLoading || !sessionId || !user) return;
     setError(null);
-    const userMsg: Message = { role: 'user', content: text.trim() };
+    const userMsg: Message = { role: 'user', content: text.trim(), fromVoice };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+    if (mode === 'voice') setVoiceState('ai-responding');
 
-    // Persist user message
     await supabase.from('therapist_messages').insert({
-      session_id: sessionId,
-      user_id: user.id,
-      role: 'user',
-      content: text.trim(),
+      session_id: sessionId, user_id: user.id, role: 'user', content: text.trim(),
     });
 
     let assistantContent = '';
     const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
+      latestAssistantRef.current = assistantContent;
       setMessages(prev => {
         const last = prev[prev.length - 1];
-        if (last?.role === 'assistant' && prev.length > 1 && prev[prev.length - 2]?.role === 'user' && prev[prev.length - 2].content === text.trim()) {
+        if (last?.role === 'assistant' && prev.length > 1 && prev[prev.length - 2]?.role === 'user') {
           return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantContent } : m);
         }
         return [...prev, { role: 'assistant', content: assistantContent }];
@@ -132,7 +139,6 @@ export default function TherapistChat() {
 
     try {
       const chatMessages = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
-
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
@@ -147,15 +153,13 @@ export default function TherapistChat() {
         throw new Error(errData.error || `Error ${resp.status}`);
       }
 
-      // Check if it's a crisis (non-streamed) response
       const contentType = resp.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
         const data = await resp.json();
-        const content = data.choices?.[0]?.message?.content || 'I\'m here for you.';
+        const content = data.choices?.[0]?.message?.content || "I'm here for you.";
         setMessages(prev => [...prev, { role: 'assistant', content }]);
         assistantContent = content;
       } else {
-        // Stream SSE
         const reader = resp.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -187,57 +191,136 @@ export default function TherapistChat() {
         }
       }
 
-      // Persist assistant message
+      // Persist
       if (assistantContent) {
         await supabase.from('therapist_messages').insert({
-          session_id: sessionId,
-          user_id: user.id,
-          role: 'assistant',
-          content: assistantContent,
+          session_id: sessionId, user_id: user.id, role: 'assistant', content: assistantContent,
         });
+      }
+
+      // TTS for voice mode
+      if (ttsEnabled && (mode === 'voice' || fromVoice)) {
+        setVoiceState('ai-speaking');
+        const plainText = assistantContent.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
+        speak(plainText);
+        // Estimate speech duration then return to idle
+        const words = plainText.split(/\s+/).length;
+        const durationMs = Math.max(2000, (words / 2.2) * 1000); // ~2.2 words/sec at 0.75 rate
+        setTimeout(() => setVoiceState('idle'), durationMs);
+      } else {
+        setVoiceState('idle');
       }
     } catch (e: any) {
       console.error('Chat error:', e);
       setError(e.message || 'Failed to get response');
+      setVoiceState('error');
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, sessionId, user, messages, therapistId, topic, therapist.greeting]);
+  }, [isLoading, sessionId, user, messages, therapistId, topic, therapist.greeting, mode, ttsEnabled, speak]);
 
-  // Speech recognition
-  const toggleListening = () => {
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
+  // Voice recording via Web Speech API
+  const startListening = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      setVoiceState('permission-denied');
+      setError('Speech recognition not supported in this browser');
       return;
     }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
+
+    stopSpeaking(); // Stop any ongoing TTS
+
     const rec = new SR();
     rec.continuous = false;
     rec.interimResults = false;
     rec.lang = 'en-US';
+
+    rec.onstart = () => setVoiceState('listening');
+
     rec.onresult = (e: any) => {
       const text = e.results[0]?.[0]?.transcript;
-      if (text) setInput(prev => prev + text);
-      setListening(false);
+      setVoiceState('processing');
+      if (text) {
+        sendMessage(text, true);
+      } else {
+        setVoiceState('idle');
+      }
     };
-    rec.onerror = () => setListening(false);
-    rec.onend = () => setListening(false);
+
+    rec.onerror = (e: any) => {
+      if (e.error === 'not-allowed') {
+        setVoiceState('permission-denied');
+        setError('Microphone access denied. Please allow microphone in your browser settings.');
+      } else {
+        setVoiceState('error');
+        setError('Voice recording failed. Try again or switch to text.');
+      }
+    };
+
+    rec.onend = () => {
+      if (voiceState === 'listening') setVoiceState('idle');
+    };
+
     recognitionRef.current = rec;
     rec.start();
-    setListening(true);
+  }, [stopSpeaking, sendMessage, voiceState]);
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop();
+    setVoiceState('idle');
+  }, []);
+
+  const handleMicPress = useCallback(() => {
+    if (voiceState === 'listening') {
+      stopListening();
+    } else if (voiceState === 'idle' || voiceState === 'error') {
+      startListening();
+    } else if (voiceState === 'ai-speaking') {
+      stopSpeaking();
+      setVoiceState('idle');
+    }
+  }, [voiceState, startListening, stopListening, stopSpeaking]);
+
+  const switchToText = () => {
+    stopSpeaking();
+    stopListening();
+    setVoiceState('idle');
+    setMode('text');
+  };
+
+  const switchToVoice = () => {
+    setMode('voice');
+    setVoiceState('idle');
   };
 
   const endSession = async () => {
+    stopSpeaking();
     if (sessionId && user) {
-      await supabase
-        .from('therapist_sessions')
-        .update({ ended_at: new Date().toISOString() })
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
+      await supabase.from('therapist_sessions').update({ ended_at: new Date().toISOString() }).eq('id', sessionId).eq('user_id', user.id);
     }
     navigate(`/therapist/${therapistId}`);
+  };
+
+  const replayLastResponse = () => {
+    if (latestAssistantRef.current && ttsEnabled) {
+      const plainText = latestAssistantRef.current.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
+      setVoiceState('ai-speaking');
+      speak(plainText);
+      const words = plainText.split(/\s+/).length;
+      setTimeout(() => setVoiceState('idle'), Math.max(2000, (words / 2.2) * 1000));
+    }
+  };
+
+  const voiceStateLabel = (): string => {
+    switch (voiceState) {
+      case 'listening': return 'Listening…';
+      case 'processing': return 'Processing…';
+      case 'ai-responding': return `${therapist.name} is thinking…`;
+      case 'ai-speaking': return `${therapist.name} is speaking…`;
+      case 'error': return 'Tap to try again';
+      case 'permission-denied': return 'Microphone access needed';
+      default: return `Tap to talk with ${therapist.name}`;
+    }
   };
 
   return (
@@ -258,6 +341,11 @@ export default function TherapistChat() {
           <div className="font-semibold text-foreground text-sm">{therapist.name}</div>
           <div className="text-[11px] text-muted-foreground">{therapist.subtitle}</div>
         </div>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => setTtsEnabled(!ttsEnabled)}
+          className="w-9 h-9 rounded-xl glass-card flex items-center justify-center"
+          title={ttsEnabled ? 'Mute voice' : 'Enable voice'}>
+          {ttsEnabled ? <Volume2 className="w-4 h-4 text-muted-foreground" /> : <VolumeX className="w-4 h-4 text-muted-foreground" />}
+        </motion.button>
         <motion.button whileTap={{ scale: 0.9 }} onClick={endSession}
           className="w-9 h-9 rounded-xl glass-card flex items-center justify-center">
           <X className="w-4 h-4 text-muted-foreground" />
@@ -298,7 +386,7 @@ export default function TherapistChat() {
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 ) : (
-                  msg.content
+                  <span>{msg.content}{msg.fromVoice && <Mic className="w-3 h-3 inline ml-1 opacity-40" />}</span>
                 )}
               </div>
             </motion.div>
@@ -332,38 +420,109 @@ export default function TherapistChat() {
         )}
       </div>
 
-      {/* Input */}
-      <div className="px-4 pb-4 pt-2 relative z-10 border-t border-border/30">
-        <div className="glass-card rounded-2xl flex items-end gap-2 p-2">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleListening}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-              listening ? 'bg-destructive/20 text-destructive' : 'bg-muted/30 text-muted-foreground'
-            }`}
+      {/* ─── Input area ─── */}
+      {mode === 'voice' ? (
+        /* ═══ VOICE MODE CONTROLS ═══ */
+        <div className="px-4 pb-6 pt-3 relative z-10">
+          {/* State label */}
+          <motion.p
+            key={voiceState}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center text-sm text-muted-foreground mb-5 font-medium"
           >
-            {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-          </motion.button>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
-            }}
-            placeholder={`Message ${therapist.name}...`}
-            rows={1}
-            className="flex-1 bg-transparent border-0 text-foreground text-sm placeholder:text-muted-foreground resize-none focus:outline-none py-2.5 max-h-24"
-          />
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isLoading}
-            className="w-10 h-10 rounded-xl btn-premium flex items-center justify-center shrink-0 disabled:opacity-40"
-          >
-            <Send className="w-4 h-4 text-primary-foreground" />
-          </motion.button>
+            {voiceStateLabel()}
+          </motion.p>
+
+          {/* Controls row */}
+          <div className="flex items-center justify-center gap-6">
+            {/* Keyboard switch */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={switchToText}
+              className="voice-control-btn w-12 h-12 rounded-full flex items-center justify-center"
+            >
+              <Keyboard className="w-5 h-5 text-foreground/70" />
+            </motion.button>
+
+            {/* Main mic button */}
+            <div className="relative">
+              {/* Ripple rings when listening */}
+              {voiceState === 'listening' && (
+                <>
+                  <span className="absolute inset-0 rounded-full bg-primary/20 animate-ripple" />
+                  <span className="absolute inset-0 rounded-full bg-primary/10 animate-ripple" style={{ animationDelay: '0.6s' }} />
+                </>
+              )}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={handleMicPress}
+                disabled={voiceState === 'processing' || voiceState === 'ai-responding'}
+                className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+                  voiceState === 'listening'
+                    ? 'mic-listening'
+                    : voiceState === 'ai-speaking'
+                    ? 'ai-speaking bg-accent/80'
+                    : voiceState === 'processing' || voiceState === 'ai-responding'
+                    ? 'mic-processing bg-muted'
+                    : 'mic-idle bg-primary/90'
+                } disabled:cursor-not-allowed`}
+              >
+                {voiceState === 'listening' ? (
+                  <MicOff className="w-7 h-7 text-primary-foreground" />
+                ) : voiceState === 'ai-speaking' ? (
+                  <Volume2 className="w-7 h-7 text-accent-foreground" />
+                ) : (
+                  <Mic className="w-7 h-7 text-primary-foreground" />
+                )}
+              </motion.button>
+            </div>
+
+            {/* Replay / next action */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={replayLastResponse}
+              disabled={!latestAssistantRef.current}
+              className="voice-control-btn w-12 h-12 rounded-full flex items-center justify-center disabled:opacity-30"
+              title="Replay last response"
+            >
+              <ChevronRight className="w-5 h-5 text-foreground/70" />
+            </motion.button>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* ═══ TEXT MODE INPUT ═══ */
+        <div className="px-4 pb-4 pt-2 relative z-10 border-t border-border/30">
+          <div className="glass-card rounded-2xl flex items-end gap-2 p-2">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={switchToVoice}
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-muted/30 text-muted-foreground"
+              title="Switch to voice"
+            >
+              <Mic className="w-4 h-4" />
+            </motion.button>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
+              }}
+              placeholder={`Message ${therapist.name}...`}
+              rows={1}
+              className="flex-1 bg-transparent border-0 text-foreground text-sm placeholder:text-muted-foreground resize-none focus:outline-none py-2.5 max-h-24"
+            />
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => sendMessage(input)}
+              disabled={!input.trim() || isLoading}
+              className="w-10 h-10 rounded-xl btn-premium flex items-center justify-center shrink-0 disabled:opacity-40"
+            >
+              <Send className="w-4 h-4 text-primary-foreground" />
+            </motion.button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

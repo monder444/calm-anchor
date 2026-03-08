@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getTherapist } from '@/lib/therapists';
-import { ArrowLeft, MessageCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MessageCircle, AlertTriangle, Mic } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
 const allTopics = [
@@ -109,18 +109,34 @@ export default function TherapistIntro() {
           </div>
         </div>
 
-        {/* CTA */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => navigate(`/therapist/${therapist.id}/chat`)}
-          className="mt-8 w-full max-w-sm h-14 rounded-2xl btn-premium text-primary-foreground font-semibold text-base flex items-center justify-center gap-2"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Start Session with {therapist.name}
-        </motion.button>
+        {/* CTAs */}
+        <div className="mt-8 w-full max-w-sm space-y-3">
+          {/* Voice CTA — primary */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate(`/therapist/${therapist.id}/chat`, { state: { voiceMode: true } })}
+            className="w-full h-14 rounded-2xl btn-premium text-primary-foreground font-semibold text-base flex items-center justify-center gap-2.5"
+          >
+            <Mic className="w-5 h-5" />
+            Tap to Talk with {therapist.name}
+          </motion.button>
+
+          {/* Text CTA — secondary */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate(`/therapist/${therapist.id}/chat`)}
+            className="w-full h-12 rounded-2xl glass-card text-foreground font-medium text-sm flex items-center justify-center gap-2 border border-border/40"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Start Text Session
+          </motion.button>
+        </div>
       </div>
 
       <BottomNav />
