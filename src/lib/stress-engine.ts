@@ -37,7 +37,8 @@ export interface StressClassification {
 export function classifyState(
   snapshot: BiometricSnapshot,
   baseline: UserBaseline = DEFAULT_BASELINE,
-  context?: { isExercising?: boolean; isWorkout?: boolean }
+  context?: { isExercising?: boolean; isWorkout?: boolean },
+  sensitivity: number = 3
 ): StressClassification {
   if (context?.isExercising || context?.isWorkout) {
     return {
@@ -50,12 +51,28 @@ export function classifyState(
     };
   }
 
+  // Sensitivity multiplier: 1=least sensitive (0.6x), 5=most sensitive (1.4x)
+  const sensMul = 0.6 + (sensitivity - 1) * 0.2;
+
   const hrElevation = (snapshot.heartRate - baseline.avgHeartRate) / baseline.avgHeartRate;
   const hrvDepression = (baseline.avgHrv - snapshot.hrv) / baseline.avgHrv;
   const { fear, tension, flatAffect, relaxed } = snapshot.emotionalMarkers;
 
+  // Adjusted thresholds — lower thresholds at higher sensitivity
+  const panicHrThresh = 120 / sensMul;
+  const panicHrvThresh = 20 / sensMul;
+  const panicFearThresh = 0.5 / sensMul;
+
+  const anxHrThresh = 0.2 / sensMul;
+  const anxHrvThresh = 40 / sensMul;
+  const anxTensionThresh = 0.3 / sensMul;
+
+  const depHrRatio = 0.9 + (1 - sensMul) * 0.05;
+  const depMoveThresh = 20 / sensMul;
+  const depFlatThresh = 0.4 / sensMul;
+
   // Panic
-  if (snapshot.heartRate >= 120 && snapshot.hrv < 20 && fear > 0.5) {
+  if (snapshot.heartRate >= panicHrThresh && snapshot.hrv < panicHrvThresh && fear > panicFearThresh) {
     return {
       state: 'panic',
       confidence: Math.min(0.95, 0.5 + fear * 0.3 + hrvDepression * 0.2),
@@ -67,7 +84,7 @@ export function classifyState(
   }
 
   // Anxiety
-  if (hrElevation > 0.2 && snapshot.hrv < 40 && tension > 0.3) {
+  if (hrElevation > anxHrThresh && snapshot.hrv < anxHrvThresh && tension > anxTensionThresh) {
     return {
       state: 'anxiety',
       confidence: Math.min(0.9, 0.4 + tension * 0.3 + hrElevation * 0.2),
@@ -79,7 +96,7 @@ export function classifyState(
   }
 
   // Depression
-  if (snapshot.heartRate < baseline.avgHeartRate * 0.9 && snapshot.movement < 20 && flatAffect > 0.4) {
+  if (snapshot.heartRate < baseline.avgHeartRate * depHrRatio && snapshot.movement < depMoveThresh && flatAffect > depFlatThresh) {
     return {
       state: 'depression',
       confidence: Math.min(0.85, 0.3 + flatAffect * 0.35 + (1 - snapshot.movement / 100) * 0.2),
