@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
