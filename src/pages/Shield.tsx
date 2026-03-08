@@ -29,7 +29,7 @@ function MuteToggle({ muted, onToggle }: { muted: boolean; onToggle: () => void 
     <motion.button
       whileTap={{ scale: 0.9 }}
       onClick={onToggle}
-      className="absolute top-6 left-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
+      className="absolute top-6 left-6 w-12 h-12 rounded-2xl glass-card flex items-center justify-center"
       aria-label={muted ? 'Unmute voice' : 'Mute voice'}
     >
       {muted ? (
@@ -47,7 +47,9 @@ export default function ShieldPage() {
   const mode = app.shieldMode;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+      <div className="ambient-orb w-96 h-96 bg-amber/15 top-1/4 -right-32" />
+      <div className="ambient-orb w-72 h-72 bg-primary/15 -bottom-20 -left-20" />
       {mode === 'brave' ? <BraveMode onExit={() => navigate('/home')} /> : <SafetyMode onExit={() => navigate('/home')} />}
     </div>
   );
@@ -85,25 +87,25 @@ function BraveMode({ onExit }: { onExit: () => void }) {
   const done = stepIndex >= braveSteps.length - 1;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
+    <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
       <MuteToggle muted={app.voiceMuted} onToggle={() => { if (!app.voiceMuted) stop(); app.setVoiceMuted(!app.voiceMuted); }} />
 
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={handleExit}
-        className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
+        className="absolute top-6 right-6 w-12 h-12 rounded-2xl glass-card flex items-center justify-center"
       >
         <X className="w-6 h-6 text-muted-foreground" />
       </motion.button>
 
       {/* Heartbeat pulse */}
       <motion.div
-        className="w-32 h-32 rounded-full bg-amber/10 border-2 border-amber/30 flex items-center justify-center mb-12"
+        className="w-36 h-36 rounded-full bg-amber/8 border-2 border-amber/20 flex items-center justify-center mb-12"
         animate={{ scale: [1, 1.1, 1, 1.05, 1] }}
         transition={{ duration: heartbeatSpeed, repeat: Infinity }}
       >
         <motion.div
-          className="w-20 h-20 rounded-full bg-amber/20 flex items-center justify-center"
+          className="w-22 h-22 rounded-full bg-amber/12 flex items-center justify-center"
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ duration: heartbeatSpeed, repeat: Infinity, delay: 0.1 }}
         >
@@ -111,13 +113,11 @@ function BraveMode({ onExit }: { onExit: () => void }) {
         </motion.div>
       </motion.div>
 
-      {/* Voice indicator */}
       <div className="flex items-center gap-2 mb-6">
         <Volume2 className="w-4 h-4 text-primary" />
-        <span className="text-xs text-muted-foreground uppercase tracking-widest">Brave Voice</span>
+        <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Brave Voice</span>
       </div>
 
-      {/* Step text */}
       <AnimatePresence mode="wait">
         <motion.p
           key={stepIndex}
@@ -125,7 +125,7 @@ function BraveMode({ onExit }: { onExit: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.6 }}
-          className="text-center text-xl font-medium text-foreground leading-relaxed max-w-sm tracking-wide"
+          className="text-center text-xl font-display font-medium text-foreground leading-relaxed max-w-sm tracking-wide"
         >
           {current.text}
         </motion.p>
@@ -138,7 +138,7 @@ function BraveMode({ onExit }: { onExit: () => void }) {
           transition={{ delay: 2 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleExit}
-          className="mt-12 h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg"
+          className="mt-12 h-14 px-10 rounded-2xl btn-premium text-primary-foreground font-semibold text-lg"
         >
           I Feel Better
         </motion.button>
@@ -166,20 +166,20 @@ function SafetyMode({ onExit }: { onExit: () => void }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
+    <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
       <MuteToggle muted={app.voiceMuted} onToggle={() => { if (!app.voiceMuted) stop(); app.setVoiceMuted(!app.voiceMuted); }} />
 
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={handleExit}
-        className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center"
+        className="absolute top-6 right-6 w-12 h-12 rounded-2xl glass-card flex items-center justify-center"
       >
         <X className="w-6 h-6 text-muted-foreground" />
       </motion.button>
 
       <div className="flex items-center gap-2 mb-8">
         <ShieldIcon className="w-5 h-5 text-primary" />
-        <span className="text-xs text-muted-foreground uppercase tracking-widest">Grounding Guide</span>
+        <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Grounding Guide</span>
       </div>
 
       {!done ? (
@@ -190,7 +190,7 @@ function SafetyMode({ onExit }: { onExit: () => void }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center text-xl font-medium text-foreground leading-relaxed max-w-sm mb-12 tracking-wide"
+              className="text-center text-xl font-display font-medium text-foreground leading-relaxed max-w-sm mb-12 tracking-wide"
             >
               {current.text}
             </motion.p>
@@ -199,24 +199,24 @@ function SafetyMode({ onExit }: { onExit: () => void }) {
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={() => setPromptIndex(promptIndex + 1)}
-            className="w-full max-w-xs h-20 rounded-3xl bg-primary/20 border-2 border-primary/40 text-primary font-bold text-xl"
+            className="w-full max-w-xs h-20 rounded-3xl bg-primary/12 border-2 border-primary/25 text-primary font-bold text-xl"
           >
             {current.action}
           </motion.button>
 
-          <p className="text-xs text-muted-foreground mt-6">
+          <p className="text-xs text-muted-foreground mt-6 font-medium">
             Step {promptIndex + 1} of {groundingPrompts.length}
           </p>
         </>
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
           <div className="text-5xl mb-6">🌊</div>
-          <h2 className="text-2xl font-bold text-foreground mb-3">The wave has passed</h2>
-          <p className="text-muted-foreground mb-8">You stayed present. You did it.</p>
+          <h2 className="text-2xl font-display font-bold text-foreground mb-3">The wave has passed</h2>
+          <p className="text-muted-foreground mb-8 leading-relaxed">You stayed present. You did it.</p>
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleExit}
-            className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg"
+            className="h-14 px-10 rounded-2xl btn-premium text-primary-foreground font-semibold text-lg"
           >
             Return Home
           </motion.button>

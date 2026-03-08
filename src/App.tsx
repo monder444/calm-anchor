@@ -22,7 +22,14 @@ const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-muted-foreground animate-pulse">Loading…</span></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-2xl btn-premium animate-pulse" />
+        <span className="text-muted-foreground text-sm animate-pulse">Loading…</span>
+      </div>
+    </div>
+  );
   if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
@@ -31,7 +38,14 @@ function AppRoutes() {
   const { isOnboarded } = useAppState();
   const { user, loading } = useAuth();
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-muted-foreground animate-pulse">Loading…</span></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-2xl btn-premium animate-pulse" />
+        <span className="text-muted-foreground text-sm animate-pulse">Loading…</span>
+      </div>
+    </div>
+  );
 
   return (
     <Routes>

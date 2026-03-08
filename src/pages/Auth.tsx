@@ -65,15 +65,27 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      {/* Ambient orbs */}
+      <div className="ambient-orb w-80 h-80 bg-primary/30 -top-24 -right-24" />
+      <div className="ambient-orb w-96 h-96 bg-accent/20 -bottom-40 -left-40" />
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm"
+        className="w-full max-w-sm relative z-10"
       >
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Anchor AI</h1>
-          <p className="text-muted-foreground text-sm mt-2">
+        <div className="text-center mb-12">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="w-16 h-16 rounded-3xl btn-premium mx-auto mb-5 flex items-center justify-center"
+          >
+            <span className="text-2xl text-primary-foreground font-display font-bold">A</span>
+          </motion.div>
+          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Anchor AI</h1>
+          <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
             {mode === 'login' && 'Welcome back. Sign in to continue.'}
             {mode === 'signup' && 'Create your account to get started.'}
             {mode === 'forgot' && 'Enter your email to reset your password.'}
@@ -96,7 +108,7 @@ export default function Auth() {
                     placeholder="Display name"
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
-                    className="w-full glass rounded-2xl pl-11 pr-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 bg-muted"
+                    className="w-full glass-card rounded-2xl pl-11 pr-4 py-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                   />
                 </div>
               </motion.div>
@@ -111,7 +123,7 @@ export default function Auth() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full glass rounded-2xl pl-11 pr-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 bg-muted"
+              className="w-full glass-card rounded-2xl pl-11 pr-4 py-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
           </div>
 
@@ -125,7 +137,7 @@ export default function Auth() {
                 minLength={6}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full glass rounded-2xl pl-11 pr-11 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 bg-muted"
+                className="w-full glass-card rounded-2xl pl-11 pr-11 py-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
               />
               <button
                 type="button"
@@ -145,7 +157,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => setMode('forgot')}
-              className="text-xs text-primary hover:underline block ml-1"
+              className="text-xs text-primary hover:underline block ml-1 font-medium"
             >
               Forgot password?
             </button>
@@ -155,7 +167,7 @@ export default function Auth() {
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={submitting}
-            className="w-full rounded-2xl py-3.5 bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full rounded-2xl py-4 btn-premium text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {submitting ? (
               <span className="animate-pulse">Please wait…</span>
@@ -172,10 +184,10 @@ export default function Auth() {
 
         {mode !== 'forgot' && (
           <>
-            <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-muted" />
-              <span className="text-xs text-muted-foreground">or</span>
-              <div className="flex-1 h-px bg-muted" />
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-border/60" />
+              <span className="text-xs text-muted-foreground font-medium">or</span>
+              <div className="flex-1 h-px bg-border/60" />
             </div>
 
             <motion.button
@@ -183,7 +195,7 @@ export default function Auth() {
               type="button"
               disabled={googleLoading}
               onClick={handleGoogleSignIn}
-              className="w-full rounded-2xl py-3.5 bg-muted text-foreground font-medium text-sm flex items-center justify-center gap-3 disabled:opacity-50 hover:bg-muted/80 transition-colors"
+              className="w-full rounded-2xl py-4 glass-card text-foreground font-medium text-sm flex items-center justify-center gap-3 disabled:opacity-50 transition-colors"
             >
               {googleLoading ? (
                 <span className="animate-pulse">Connecting…</span>
@@ -202,11 +214,11 @@ export default function Auth() {
           </>
         )}
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-8">
           {mode === 'login' && (
             <p className="text-sm text-muted-foreground">
               Don't have an account?{' '}
-              <button onClick={() => setMode('signup')} className="text-primary font-medium hover:underline">
+              <button onClick={() => setMode('signup')} className="text-primary font-semibold hover:underline">
                 Sign up
               </button>
             </p>
@@ -214,7 +226,7 @@ export default function Auth() {
           {(mode === 'signup' || mode === 'forgot') && (
             <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
-              <button onClick={() => setMode('login')} className="text-primary font-medium hover:underline">
+              <button onClick={() => setMode('login')} className="text-primary font-semibold hover:underline">
                 Sign in
               </button>
             </p>

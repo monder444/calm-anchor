@@ -56,24 +56,27 @@ export default function Meditations() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+      <div className="ambient-orb w-72 h-72 bg-accent/15 -top-20 -right-20" />
+      <div className="ambient-orb w-64 h-64 bg-primary/10 bottom-32 -left-20" />
+
       {/* Header */}
-      <div className="px-6 pt-4 flex items-center gap-4">
+      <div className="px-6 pt-6 flex items-center gap-4 relative z-10">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </motion.button>
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Guided Meditations</h1>
+          <h1 className="text-lg font-display font-semibold text-foreground">Guided Meditations</h1>
           <p className="text-xs text-muted-foreground">Ground your mind and body</p>
         </div>
       </div>
 
       {/* Intro */}
-      <div className="px-6 pt-5 pb-2">
+      <div className="px-6 pt-5 pb-2 relative z-10">
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +91,7 @@ export default function Meditations() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-6 mb-2 p-4 rounded-2xl bg-destructive/10 border border-destructive/30 flex items-center gap-3"
+          className="mx-6 mb-2 p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3 relative z-10"
         >
           <WifiOff className="w-5 h-5 text-destructive shrink-0" />
           <p className="text-sm text-destructive">
@@ -98,7 +101,7 @@ export default function Meditations() {
       )}
 
       {/* Meditation list */}
-      <div className="flex-1 px-6 py-4 overflow-y-auto space-y-3">
+      <div className="flex-1 px-6 py-4 overflow-y-auto space-y-3 relative z-10">
         {meditations.map((m, i) => (
           <motion.button
             key={m.id}
@@ -107,13 +110,13 @@ export default function Meditations() {
             transition={{ delay: i * 0.08 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => openMeditation(m.url)}
-            className="w-full glass rounded-2xl p-5 flex items-center gap-4 text-left"
+            className="w-full glass-card rounded-3xl p-5 flex items-center gap-4 text-left"
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-xl">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-xl">
               {m.emoji}
             </div>
             <div className="flex-1">
-              <div className="font-medium text-foreground text-sm">{m.title}</div>
+              <div className="font-semibold text-foreground text-sm">{m.title}</div>
               <div className="text-xs text-muted-foreground mt-0.5">
                 {m.subtitle} · {m.duration}
               </div>
@@ -122,20 +125,19 @@ export default function Meditations() {
           </motion.button>
         ))}
 
-        {/* More link */}
         <motion.button
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: meditations.length * 0.08 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => openMeditation(MINDFUL_BASE_URL)}
-          className="w-full glass rounded-2xl p-5 flex items-center gap-4 text-left"
+          className="w-full glass-card rounded-3xl p-5 flex items-center gap-4 text-left"
         >
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </div>
           <div className="flex-1">
-            <div className="font-medium text-foreground text-sm">More Mindful Audio</div>
+            <div className="font-semibold text-foreground text-sm">More Mindful Audio</div>
             <div className="text-xs text-muted-foreground mt-0.5">
               Explore additional guided practices
             </div>
@@ -144,7 +146,7 @@ export default function Meditations() {
       </div>
 
       {/* Attribution */}
-      <div className="px-6 py-4 text-center">
+      <div className="px-6 py-4 text-center relative z-10">
         <p className="text-[11px] text-muted-foreground">
           Audio resources provided by{' '}
           <a
@@ -166,11 +168,11 @@ export default function Meditations() {
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 bg-background flex flex-col safe-top safe-bottom"
         >
-          <div className="px-4 py-3 flex items-center gap-3 border-b border-border">
+          <div className="px-4 py-3 flex items-center gap-3 border-b border-border/50">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setWebviewUrl(null)}
-              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+              className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
             >
               <X className="w-5 h-5 text-foreground" />
             </motion.button>

@@ -10,19 +10,21 @@ export default function SettingsPage() {
   const { signOut, user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
-      <div className="px-6 pt-4 flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+      <div className="ambient-orb w-64 h-64 bg-primary/10 -top-16 -right-16" />
+
+      <div className="px-6 pt-6 flex items-center gap-4 mb-6 relative z-10">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </motion.button>
-        <h1 className="text-lg font-semibold text-foreground">Settings</h1>
+        <h1 className="text-lg font-display font-semibold text-foreground">Settings</h1>
       </div>
 
-      <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto">
+      <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto relative z-10">
         {/* Shield Mode */}
         <Section title="Crisis Settings">
           <SettingRow
@@ -44,16 +46,16 @@ export default function SettingsPage() {
               app.setNotificationStyle(next);
             }}
           />
-          <div className="px-4 py-3">
-            <label className="text-sm text-muted-foreground mb-2 block">Sensitivity (1-5)</label>
+          <div className="px-5 py-4">
+            <label className="text-sm text-muted-foreground mb-3 block font-medium">Sensitivity (1-5)</label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
                 <motion.button
                   key={n}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => app.setSensitivity(n)}
-                  className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all ${
-                    app.sensitivity === n ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  className={`flex-1 h-10 rounded-2xl text-sm font-semibold transition-all ${
+                    app.sensitivity === n ? 'btn-premium text-primary-foreground' : 'bg-muted/50 text-muted-foreground'
                   }`}
                 >
                   {n}
@@ -95,16 +97,16 @@ export default function SettingsPage() {
 
         {/* Account */}
         <Section title="Account">
-          <div className="px-4 py-3">
+          <div className="px-5 py-3">
             <span className="text-xs text-muted-foreground">{user?.email}</span>
           </div>
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={async () => { await signOut(); navigate('/auth'); }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-left"
+            className="w-full flex items-center gap-3 px-5 py-3.5 text-left"
           >
-            <LogOut className="w-5 h-5 text-destructive-foreground" />
-            <span className="text-sm text-destructive-foreground font-medium">Sign Out</span>
+            <LogOut className="w-5 h-5 text-destructive" />
+            <span className="text-sm text-destructive font-semibold">Sign Out</span>
           </motion.button>
         </Section>
 
@@ -113,10 +115,10 @@ export default function SettingsPage() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => { app.resetOnboarding(); navigate('/'); }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-left"
+            className="w-full flex items-center gap-3 px-5 py-3.5 text-left"
           >
             <RotateCcw className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Reset Onboarding</span>
+            <span className="text-sm text-muted-foreground font-medium">Reset Onboarding</span>
           </motion.button>
         </Section>
       </div>
@@ -127,8 +129,8 @@ export default function SettingsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">{title}</h3>
-      <div className="glass rounded-2xl overflow-hidden divide-y divide-border">{children}</div>
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">{title}</h3>
+      <div className="glass-card rounded-3xl overflow-hidden divide-y divide-border/40">{children}</div>
     </div>
   );
 }
@@ -138,11 +140,11 @@ function SettingRow({ icon, label, value, onClick }: { icon: React.ReactNode; la
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+      className="w-full flex items-center gap-3 px-5 py-4 text-left"
     >
       {icon}
-      <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
-      {value && <span className="text-xs text-muted-foreground">{value}</span>}
+      <span className="flex-1 text-sm font-semibold text-foreground">{label}</span>
+      {value && <span className="text-xs text-muted-foreground font-medium">{value}</span>}
       <ChevronRight className="w-4 h-4 text-muted-foreground" />
     </motion.button>
   );
