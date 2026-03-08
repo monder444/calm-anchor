@@ -33,9 +33,9 @@ export function useSpeech() {
     if (!window.speechSynthesis) return;
     stop();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.85;
-    utter.pitch = 0.9;
-    utter.volume = 1;
+    utter.rate = 0.75;   // slower = calmer
+    utter.pitch = 0.85;  // slightly lower = warmer
+    utter.volume = 0.9;  // just under max to feel gentler
     const voice = pickVoice();
     if (voice) utter.voice = voice;
     utterRef.current = utter;
