@@ -198,15 +198,11 @@ export default function TherapistChat() {
         });
       }
 
-      // TTS for voice mode
+      // TTS for voice mode — use onEnd callback instead of timeout
       if (ttsEnabled && (mode === 'voice' || fromVoice)) {
         setVoiceState('ai-speaking');
         const plainText = assistantContent.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
-        speak(plainText);
-        // Estimate speech duration then return to idle
-        const words = plainText.split(/\s+/).length;
-        const durationMs = Math.max(2000, (words / 2.2) * 1000); // ~2.2 words/sec at 0.75 rate
-        setTimeout(() => setVoiceState('idle'), durationMs);
+        speak(plainText, () => setVoiceState('idle'));
       } else {
         setVoiceState('idle');
       }
@@ -231,39 +227,57 @@ export default function TherapistChat() {
     stopSpeaking(); // Stop any ongoing TTS
 
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = true;       // Let user speak freely without cutoff
     rec.interimResults = false;
     rec.lang = 'en-US';
 
-    rec.onstart = () => setVoiceState('listening');
+    let finalTranscript = '';
+    let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    rec.onstart = () => {
+      finalTranscript = '';
+      setVoiceState('listening');
+    };
 
     rec.onresult = (e: any) => {
-      const text = e.results[0]?.[0]?.transcript;
-      setVoiceState('processing');
-      if (text) {
-        sendMessage(text, true);
-      } else {
-        setVoiceState('idle');
+      // Accumulate all final results
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript + ' ';
+        }
       }
+      // Reset silence timer — wait for user to finish speaking
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        rec.stop();
+      }, 2000); // 2s of silence = user is done
     };
 
     rec.onerror = (e: any) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
       if (e.error === 'not-allowed') {
         setVoiceState('permission-denied');
         setError('Microphone access denied. Please allow microphone in your browser settings.');
-      } else {
+      } else if (e.error !== 'aborted') {
         setVoiceState('error');
         setError('Voice recording failed. Try again or switch to text.');
       }
     };
 
     rec.onend = () => {
-      if (voiceState === 'listening') setVoiceState('idle');
+      if (silenceTimer) clearTimeout(silenceTimer);
+      const text = finalTranscript.trim();
+      if (text) {
+        setVoiceState('processing');
+        sendMessage(text, true);
+      } else {
+        setVoiceState('idle');
+      }
     };
 
     recognitionRef.current = rec;
     rec.start();
-  }, [stopSpeaking, sendMessage, voiceState]);
+  }, [stopSpeaking, sendMessage]);
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop();
@@ -305,9 +319,7 @@ export default function TherapistChat() {
     if (latestAssistantRef.current && ttsEnabled) {
       const plainText = latestAssistantRef.current.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
       setVoiceState('ai-speaking');
-      speak(plainText);
-      const words = plainText.split(/\s+/).length;
-      setTimeout(() => setVoiceState('idle'), Math.max(2000, (words / 2.2) * 1000));
+      speak(plainText, () => setVoiceState('idle'));
     }
   };
 
