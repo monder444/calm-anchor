@@ -168,21 +168,26 @@
   }
 
   .glass-card {
-    background: hsla(var(--surface-glass), 0.65);
+    background: linear-gradient(
+      135deg,
+      hsla(258, 40%, 55%, 0.12) 0%,
+      hsla(270, 35%, 50%, 0.10) 50%,
+      hsla(285, 30%, 45%, 0.08) 100%
+    );
     backdrop-filter: blur(24px) saturate(1.4);
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border: 1px solid hsla(var(--border), 0.5);
+    border: 1px solid hsla(258, 50%, 60%, 0.18);
     box-shadow:
-      0 1px 3px hsla(var(--glow-primary), 0.03),
-      0 8px 32px hsla(var(--glow-primary), 0.05);
+      0 1px 3px hsla(var(--glow-primary), 0.04),
+      0 8px 32px hsla(var(--glow-primary), 0.06);
     transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   }
 
   .glass-card:hover {
-    border-color: hsla(var(--primary), 0.2);
+    border-color: hsla(var(--primary), 0.3);
     box-shadow:
-      0 1px 3px hsla(var(--glow-primary), 0.04),
-      0 12px 40px hsla(var(--glow-primary), 0.1);
+      0 1px 3px hsla(var(--glow-primary), 0.06),
+      0 12px 40px hsla(var(--glow-primary), 0.12);
   }
 
   /* Light mode: cleaner white cards matching reference */
