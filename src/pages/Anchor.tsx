@@ -32,54 +32,58 @@ export default function Anchor() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+      <div className="ambient-orb w-72 h-72 bg-primary/20 -top-20 -right-20" />
+      <div className="ambient-orb w-64 h-64 bg-accent/10 bottom-20 -left-20" />
+
       {/* Header */}
-      <div className="px-6 pt-4 flex items-center gap-4">
+      <div className="px-6 pt-6 flex items-center gap-4 relative z-10">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </motion.button>
         <div>
-          <h1 className="text-lg font-semibold text-foreground">The Anchor</h1>
+          <h1 className="text-lg font-display font-semibold text-foreground">The Anchor</h1>
           <p className="text-xs text-muted-foreground">1% Wins — small steps count</p>
         </div>
       </div>
 
       {/* Plant Growth */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-3xl p-6 flex items-center gap-5"
+          className="glass-card rounded-3xl p-6 flex items-center gap-5"
         >
           <div className="relative">
             <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
+              animate={{ y: [0, -4, 0] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
               <Sprout className="w-12 h-12 text-primary" />
             </motion.div>
           </div>
           <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-1">Your growth</p>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <p className="text-sm text-muted-foreground mb-2 font-medium">Your growth</p>
+            <div className="h-2.5 bg-muted/50 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-primary rounded-full"
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))' }}
                 animate={{ width: `${app.plantGrowth}%` }}
                 transition={{ duration: 0.5 }}
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{app.completedWins} wins completed</p>
+            <p className="text-xs text-muted-foreground mt-1.5">{app.completedWins} wins completed</p>
           </div>
         </motion.div>
       </div>
 
       {/* Tasks */}
-      <div className="flex-1 px-6 pb-6 overflow-y-auto">
-        <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-widest">
+      <div className="flex-1 px-6 pb-6 overflow-y-auto relative z-10">
+        <h3 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-widest">
           Today's Micro-Tasks
         </h3>
         <div className="space-y-3">
@@ -93,20 +97,20 @@ export default function Anchor() {
                 transition={{ delay: i * 0.06 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleComplete(task)}
-                className={`w-full glass rounded-2xl p-4 flex items-center gap-4 text-left transition-all ${
-                  isDone ? 'opacity-60' : ''
+                className={`w-full glass-card rounded-2xl p-4 flex items-center gap-4 text-left transition-all ${
+                  isDone ? 'opacity-50' : ''
                 }`}
               >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg ${
-                  isDone ? 'bg-primary/20' : 'bg-muted'
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg ${
+                  isDone ? 'bg-primary/15' : 'bg-muted/50'
                 }`}>
                   {isDone ? <Check className="w-5 h-5 text-primary" /> : task.emoji}
                 </div>
                 <div className="flex-1">
-                  <div className={`font-medium text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                  <div className={`font-semibold text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                     {task.label}
                   </div>
-                  <div className="text-xs text-muted-foreground">{task.desc}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{task.desc}</div>
                 </div>
               </motion.button>
             );

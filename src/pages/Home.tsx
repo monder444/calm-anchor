@@ -6,10 +6,10 @@ import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 
 const stateStyles = {
-  panic: { bg: 'bg-amber/10', border: 'border-amber/30', text: 'text-amber', glow: 'glow-amber' },
-  anxiety: { bg: 'bg-accent/10', border: 'border-accent/30', text: 'text-accent', glow: 'glow-violet' },
-  depression: { bg: 'bg-accent/10', border: 'border-accent/30', text: 'text-accent', glow: 'glow-violet' },
-  baseline: { bg: 'bg-primary/10', border: 'border-primary/30', text: 'text-primary', glow: 'glow-teal' },
+  panic: { bg: 'bg-amber/10', border: 'border-amber/20', text: 'text-amber', glow: 'glow-amber' },
+  anxiety: { bg: 'bg-accent/10', border: 'border-accent/20', text: 'text-accent', glow: 'glow-violet' },
+  depression: { bg: 'bg-accent/10', border: 'border-accent/20', text: 'text-accent', glow: 'glow-violet' },
+  baseline: { bg: 'bg-primary/10', border: 'border-primary/20', text: 'text-primary', glow: 'glow-primary' },
 };
 
 export default function Home() {
@@ -37,71 +37,78 @@ export default function Home() {
   const suggestions = getSuggestions(state?.state || 'baseline');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+      {/* Ambient orbs */}
+      <div className="ambient-orb w-72 h-72 bg-primary/30 -top-20 -right-20" />
+      <div className="ambient-orb w-96 h-96 bg-accent/20 -bottom-32 -left-32" />
+
       {/* Header */}
-      <div className="px-6 pt-6 pb-2 flex items-center justify-between">
+      <div className="px-6 pt-8 pb-2 flex items-center justify-between relative z-10">
         <div>
-          <p className="text-muted-foreground text-sm">{greeting}</p>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Anchor AI</h1>
+          <p className="text-muted-foreground text-sm font-medium">{greeting}</p>
+          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight mt-0.5">
+            Anchor AI
+          </h1>
         </div>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate('/settings')}
-          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+          className="w-11 h-11 rounded-2xl glass-card flex items-center justify-center"
         >
           <Settings className="w-5 h-5 text-muted-foreground" />
         </motion.button>
       </div>
 
-      <div className="flex-1 px-6 py-4 space-y-5 overflow-y-auto">
+      <div className="flex-1 px-6 py-5 space-y-5 overflow-y-auto relative z-10">
         {/* State of Mind Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`glass rounded-3xl p-6 border ${style.border}`}
+          className={`glass-card rounded-3xl p-6 border ${style.border}`}
         >
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             <Activity className={`w-4 h-4 ${style.text}`} />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">State of Mind</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">State of Mind</span>
           </div>
-          <h2 className={`text-2xl font-bold ${style.text} mb-1`}>
+          <h2 className={`text-2xl font-display font-bold ${style.text} mb-1.5`}>
             {state?.label || 'Balanced'}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {state?.description || 'You\'re in a good place right now.'}
           </p>
         </motion.div>
 
         {/* Panic Button */}
         <motion.button
-          whileTap={{ scale: 0.95 }}
-          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.96 }}
+          whileHover={{ scale: 1.01 }}
           onClick={() => navigate('/shield')}
-          className="w-full relative overflow-hidden rounded-3xl h-32 flex items-center justify-center"
+          className="w-full relative overflow-hidden rounded-3xl h-36 flex items-center justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-amber/20 via-accent/20 to-primary/20 rounded-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber/15 via-accent/10 to-primary/15 rounded-3xl" />
+          <div className="absolute inset-0 glass-card rounded-3xl" />
           <motion.div
-            className="absolute inset-0 rounded-3xl border border-amber/20"
-            animate={{ borderColor: ['hsla(45,100%,50%,0.2)', 'hsla(45,100%,50%,0.5)', 'hsla(45,100%,50%,0.2)'] }}
+            className="absolute inset-0 rounded-3xl border border-amber/15"
+            animate={{ borderColor: ['hsla(38,95%,60%,0.15)', 'hsla(38,95%,60%,0.35)', 'hsla(38,95%,60%,0.15)'] }}
             transition={{ duration: 3, repeat: Infinity }}
           />
-          <div className="relative flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-amber/20 flex items-center justify-center">
+          <div className="relative flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-amber/15 flex items-center justify-center">
               <Shield className="w-8 h-8 text-amber" />
             </div>
             <div className="text-left">
-              <div className="text-xl font-bold text-foreground">Panic Shield</div>
-              <div className="text-sm text-muted-foreground">Tap for instant support</div>
+              <div className="text-xl font-display font-bold text-foreground">Panic Shield</div>
+              <div className="text-sm text-muted-foreground mt-0.5">Tap for instant support</div>
             </div>
           </div>
         </motion.button>
 
         {/* Suggestions */}
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-widest">
+          <h3 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-widest">
             Suggested for You
           </h3>
           <div className="space-y-3">
@@ -113,16 +120,16 @@ export default function Home() {
                 transition={{ delay: 0.2 + i * 0.08 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(s.route)}
-                className="w-full glass rounded-2xl p-4 flex items-center gap-4 text-left"
+                className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 text-left"
               >
-                <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center text-lg">
+                <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center text-lg">
                   {s.emoji}
                 </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground text-sm">{s.label}</div>
-                  <div className="text-xs text-muted-foreground">{s.desc}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-foreground text-sm">{s.label}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{s.desc}</div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </motion.button>
             ))}
           </div>
@@ -130,7 +137,7 @@ export default function Home() {
       </div>
 
       {/* Status Bar */}
-      <div className="px-6 py-4 border-t border-border">
+      <div className="px-6 py-3 border-t border-border/50 relative z-10">
         <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             {app.wearableConnected ? <Wifi className="w-3.5 h-3.5 text-primary" /> : <Wifi className="w-3.5 h-3.5" />}
@@ -148,23 +155,27 @@ export default function Home() {
       </div>
 
       {/* Bottom Nav */}
-      <div className="px-6 pb-4 flex items-center justify-around">
-        {[
-          { icon: '🏠', label: 'Home', route: '/home', active: true },
-          { icon: '📷', label: 'Scan', route: '/vibescan', active: false },
-          { icon: '🌱', label: 'Anchor', route: '/anchor', active: false },
-          { icon: '💭', label: 'Nudge', route: '/nudge', active: false },
-        ].map((item) => (
-          <motion.button
-            key={item.label}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => navigate(item.route)}
-            className={`flex flex-col items-center gap-1 ${item.active ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </motion.button>
-        ))}
+      <div className="px-6 pb-4 relative z-10">
+        <div className="glass-strong rounded-3xl px-4 py-3 flex items-center justify-around">
+          {[
+            { icon: '🏠', label: 'Home', route: '/home', active: true },
+            { icon: '📷', label: 'Scan', route: '/vibescan', active: false },
+            { icon: '🌱', label: 'Anchor', route: '/anchor', active: false },
+            { icon: '💭', label: 'Nudge', route: '/nudge', active: false },
+          ].map((item) => (
+            <motion.button
+              key={item.label}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate(item.route)}
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-2xl transition-colors ${
+                item.active ? 'text-primary bg-primary/10' : 'text-muted-foreground'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-[10px] font-semibold">{item.label}</span>
+            </motion.button>
+          ))}
+        </div>
       </div>
     </div>
   );
