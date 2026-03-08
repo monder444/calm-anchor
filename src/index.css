@@ -59,17 +59,22 @@
     --glow-accent: 270 60% 60%;
     --glow-amber: 38 95% 60%;
     --surface-glass: 240 20% 14%;
+
+    /* Gradient backgrounds */
+    --bg-gradient-from: 240 24% 10%;
+    --bg-gradient-via: 255 30% 14%;
+    --bg-gradient-to: 270 25% 12%;
   }
 
   .light {
-    /* Light Mode: Misty lavender / pearl */
-    --background: 250 30% 97%;
+    /* Light Mode: Lavender mist gradient */
+    --background: 260 40% 98%;
     --foreground: 240 20% 15%;
 
-    --card: 260 30% 99%;
+    --card: 265 35% 97%;
     --card-foreground: 240 20% 15%;
 
-    --popover: 260 30% 99%;
+    --popover: 265 35% 97%;
     --popover-foreground: 240 20% 15%;
 
     --primary: 250 70% 58%;
@@ -78,7 +83,7 @@
     --secondary: 220 55% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 250 20% 92%;
+    --muted: 255 25% 93%;
     --muted-foreground: 240 10% 45%;
 
     --accent: 270 55% 55%;
@@ -92,23 +97,28 @@
 
     --teal: 180 60% 42%;
     --violet: 270 55% 55%;
-    --indigo-deep: 250 30% 97%;
-    --indigo-light: 250 20% 92%;
+    --indigo-deep: 260 40% 98%;
+    --indigo-light: 255 25% 93%;
 
-    --border: 250 20% 88%;
-    --input: 250 20% 88%;
+    --border: 255 22% 89%;
+    --input: 255 22% 89%;
     --ring: 250 70% 58%;
 
-    --sidebar-background: 250 25% 95%;
+    --sidebar-background: 260 35% 96%;
     --sidebar-foreground: 240 20% 15%;
     --sidebar-primary: 250 70% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 270 55% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 250 20% 88%;
+    --sidebar-border: 255 22% 89%;
     --sidebar-ring: 250 70% 58%;
 
-    --surface-glass: 260 30% 99%;
+    --surface-glass: 265 35% 97%;
+
+    /* Light gradient backgrounds */
+    --bg-gradient-from: 260 40% 98%;
+    --bg-gradient-via: 270 35% 96%;
+    --bg-gradient-to: 280 30% 95%;
   }
 }
 
