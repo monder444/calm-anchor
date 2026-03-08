@@ -43,7 +43,7 @@ export default function Home() {
   const suggestions = getSuggestions(state?.state || 'baseline');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="ambient-orb w-72 h-72 bg-primary/30 -top-20 -right-20" />
       <div className="ambient-orb w-96 h-96 bg-accent/20 -bottom-32 -left-32" />

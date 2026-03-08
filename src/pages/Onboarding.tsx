@@ -35,7 +35,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="ambient-orb w-72 h-72 bg-primary/25 -top-20 -right-20" />
       <div className="ambient-orb w-80 h-80 bg-accent/15 -bottom-24 -left-24" />

@@ -36,7 +36,7 @@ export default function TherapistSelect() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-72 h-72 bg-primary/25 -top-20 -right-20" />
       <div className="ambient-orb w-80 h-80 bg-accent/15 bottom-20 -left-32" />
 

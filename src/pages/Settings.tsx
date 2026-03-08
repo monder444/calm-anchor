@@ -12,7 +12,7 @@ export default function SettingsPage() {
   const { signOut, user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top safe-bottom relative overflow-hidden">
+    <div className="min-h-screen flex flex-col safe-top safe-bottom relative overflow-hidden">
       <div className="ambient-orb w-64 h-64 bg-primary/10 -top-16 -right-16" />
 
       <div className="px-6 pt-6 flex items-center gap-4 mb-6 relative z-10">

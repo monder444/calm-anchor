@@ -26,7 +26,7 @@ const queryClient = new QueryClient();
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 rounded-2xl btn-premium animate-pulse" />
         <span className="text-muted-foreground text-sm animate-pulse">Loading…</span>
@@ -42,7 +42,7 @@ function AppRoutes() {
   const { user, loading } = useAuth();
 
   if (loading) return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 rounded-2xl btn-premium animate-pulse" />
         <span className="text-muted-foreground text-sm animate-pulse">Loading…</span>
