@@ -4,6 +4,9 @@ import { useAppState } from '@/lib/app-state';
 import { Shield, Scan, Sprout, Settings, Activity, Wifi, Check, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
+import BottomNav from '@/components/BottomNav';
+import { useEffect, useState } from 'react';
+import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 
 const stateStyles = {
   panic: { bg: 'bg-amber/10', border: 'border-amber/20', text: 'text-amber', glow: 'glow-amber' },
