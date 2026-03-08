@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { ArrowLeft, Play, Pause, WifiOff, Wind, Brain, Waves, Heart, SkipBack, SkipForward, Volume2, ExternalLink } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MeditationItem {
   id: string;
@@ -10,44 +11,69 @@ interface MeditationItem {
   title: string;
   subtitle: string;
   duration: string;
-  audioUrl: string;
   color: string;
 }
 
-// Free guided meditation audio from UCLA MARC (public domain / freely shared)
 const meditations: MeditationItem[] = [
+  {
+    id: 'breathing-3',
+    icon: Wind,
+    title: '3-Minute Breathing',
+    subtitle: 'Quick mindful reset',
+    duration: '3 min',
+    color: 'primary',
+  },
   {
     id: 'breathing-5',
     icon: Wind,
     title: '5-Minute Breathing',
-    subtitle: 'Quick reset for your mind',
+    subtitle: 'Focused breath awareness',
     duration: '5 min',
-    audioUrl: 'https://www.uclahealth.org/sites/default/files/media/2022-09/Breathing-Meditation.mp3',
     color: 'primary',
   },
   {
-    id: 'body-scan-11',
+    id: 'body-scan-4',
     icon: Brain,
-    title: 'Body Scan Meditation',
-    subtitle: 'Release tension from head to toe',
-    duration: '11 min',
-    audioUrl: 'https://www.uclahealth.org/sites/default/files/media/2022-09/Body-Scan-Meditation.mp3',
+    title: '4-Minute Body Scan',
+    subtitle: 'Release tension quickly',
+    duration: '4 min',
     color: 'accent',
   },
   {
-    id: 'loving-kindness',
+    id: 'tension-release',
     icon: Waves,
-    title: 'Loving Kindness',
-    subtitle: 'Cultivate compassion & warmth',
-    duration: '8 min',
-    audioUrl: 'https://www.uclahealth.org/sites/default/files/media/2022-09/Loving-Kindness-Meditation.mp3',
+    title: 'Tension Release',
+    subtitle: 'Let go of held stress',
+    duration: '6 min',
+    color: 'secondary',
+  },
+  {
+    id: 'breathing-space',
+    icon: Heart,
+    title: 'The Breathing Space',
+    subtitle: 'MBCT core practice',
+    duration: '6 min',
+    color: 'accent',
+  },
+  {
+    id: 'body-scan-15',
+    icon: Brain,
+    title: '15-Minute Body Scan',
+    subtitle: 'Deep relaxation practice',
+    duration: '15 min',
     color: 'secondary',
   },
 ];
 
+function getAudioUrl(id: string): string {
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+  return `${baseUrl}/functions/v1/meditation-audio?id=${id}`;
+}
+
 export default function Meditations() {
   const navigate = useNavigate();
   const [offlineError, setOfflineError] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -69,7 +95,7 @@ export default function Meditations() {
     clearTimer();
     intervalRef.current = setInterval(() => {
       const audio = audioRef.current;
-      if (audio && audio.duration) {
+      if (audio && audio.duration && !isNaN(audio.duration)) {
         setCurrentTime(audio.currentTime);
         setTotalDuration(audio.duration);
         setProgress((audio.currentTime / audio.duration) * 100);
@@ -94,7 +120,7 @@ export default function Meditations() {
     }
     setOfflineError(false);
 
-    // If tapping the same one that's playing, toggle play/pause
+    // Toggle play/pause if same meditation
     if (activeId === meditation.id && audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -114,11 +140,18 @@ export default function Meditations() {
       clearTimer();
     }
 
-    // Create and play new audio (synchronously in gesture context for iOS)
+    setLoadingId(meditation.id);
+    setActiveId(meditation.id);
+    setProgress(0);
+    setCurrentTime(0);
+    setTotalDuration(0);
+
+    // Create audio element synchronously in gesture context (iOS requirement)
     const audio = new Audio();
-    audio.play().catch(() => {}); // unlock on iOS
+    audio.play().catch(() => {}); // unlock for iOS Safari
     audio.preload = 'auto';
-    audio.src = meditation.audioUrl;
+    audio.crossOrigin = 'anonymous';
+    audio.src = getAudioUrl(meditation.id);
 
     audio.onended = () => {
       setIsPlaying(false);
@@ -126,33 +159,35 @@ export default function Meditations() {
       clearTimer();
     };
 
-    audio.onerror = () => {
+    audio.onerror = (e) => {
+      console.error('Audio error:', e);
       setIsPlaying(false);
-      setActiveId(null);
-      clearTimer();
+      setLoadingId(null);
+    };
+
+    audio.oncanplaythrough = () => {
+      setLoadingId(null);
     };
 
     audioRef.current = audio;
-    setActiveId(meditation.id);
-    setProgress(0);
-    setCurrentTime(0);
-    setTotalDuration(0);
 
     try {
       await audio.play();
       setIsPlaying(true);
+      setLoadingId(null);
       startTimer();
-    } catch {
-      // Fallback: set src and retry
-      audio.src = meditation.audioUrl;
+    } catch (err) {
+      // Retry after load
       audio.load();
       audio.oncanplaythrough = async () => {
         try {
           await audio.play();
           setIsPlaying(true);
+          setLoadingId(null);
           startTimer();
         } catch (e) {
           console.error('Playback failed:', e);
+          setLoadingId(null);
         }
       };
     }
@@ -209,11 +244,10 @@ export default function Meditations() {
           animate={{ opacity: 1, y: 0 }}
           className="text-sm text-muted-foreground leading-relaxed"
         >
-          Free guided practices from UCLA's Mindful Awareness Research Center. Tap to play directly in the app.
+          Free guided practices from the Free Mindfulness Project. Tap to play directly in the app.
         </motion.p>
       </div>
 
-      {/* Offline banner */}
       {offlineError && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -231,6 +265,7 @@ export default function Meditations() {
       <div className="flex-1 px-6 py-4 overflow-y-auto space-y-3 relative z-10">
         {meditations.map((m, i) => {
           const isActive = activeId === m.id;
+          const isLoading = loadingId === m.id;
           return (
             <motion.button
               key={m.id}
@@ -256,9 +291,8 @@ export default function Meditations() {
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-foreground text-sm">{m.title}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {m.subtitle} · {m.duration}
+                  {isLoading ? 'Loading...' : `${m.subtitle} · ${m.duration}`}
                 </div>
-                {/* Progress bar for active meditation */}
                 {isActive && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -280,6 +314,27 @@ export default function Meditations() {
             </motion.button>
           );
         })}
+
+        {/* Link to more meditations */}
+        <motion.a
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: meditations.length * 0.08 }}
+          href="https://www.freemindfulness.org/download"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full glass-card rounded-3xl p-5 flex items-center gap-4 text-left block"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-muted/30 flex items-center justify-center">
+            <ExternalLink className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold text-foreground text-sm">More Guided Meditations</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Explore dozens more at Free Mindfulness Project
+            </div>
+          </div>
+        </motion.a>
       </div>
 
       {/* Mini player bar */}
@@ -321,10 +376,10 @@ export default function Meditations() {
       <div className="px-6 py-3 text-center relative z-10">
         <p className="text-[11px] text-muted-foreground">
           Audio from{' '}
-          <a href="https://www.uclahealth.org/programs/marc/free-guided-meditations" target="_blank" rel="noopener noreferrer" className="underline text-primary">
-            UCLA MARC
+          <a href="https://www.freemindfulness.org/download" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+            Free Mindfulness Project
           </a>{' '}
-          — freely available for personal use.
+          — Creative Commons licensed.
         </p>
       </div>
     </div>
