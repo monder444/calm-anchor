@@ -213,6 +213,25 @@ export default function Meditations() {
     audioRef.current.currentTime = Math.max(0, Math.min(audioRef.current.duration || 0, audioRef.current.currentTime + seconds));
   };
 
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    if (audioRef.current) {
+      audioRef.current.volume = v;
+    }
+  };
+
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    if (volume > 0) {
+      audioRef.current.volume = 0;
+      setVolume(0);
+    } else {
+      audioRef.current.volume = 1;
+      setVolume(1);
+    }
+  };
+
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
