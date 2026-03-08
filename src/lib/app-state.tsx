@@ -88,8 +88,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setSensitivity: (n) => update({ sensitivity: n }),
     completeWin: () => update({ completedWins: state.completedWins + 1, plantGrowth: Math.min(100, state.plantGrowth + 8) }),
     setVoiceMuted: (v) => update({ voiceMuted: v }),
+    setTheme: (t) => update({ theme: t }),
     resetOnboarding: () => setState({ ...defaults }),
   };
+
+  // Apply theme class to document root
+  useEffect(() => {
+    const root = document.documentElement;
+    if (state.theme === 'light') {
+      root.classList.add('light');
+    } else {
+      root.classList.remove('light');
+    }
+  }, [state.theme]);
 
   return (
     <AppStateContext.Provider value={{ ...state, ...actions }}>
