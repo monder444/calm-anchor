@@ -319,9 +319,7 @@ export default function TherapistChat() {
     if (latestAssistantRef.current && ttsEnabled) {
       const plainText = latestAssistantRef.current.replace(/\*\*/g, '').replace(/[#\[\]()]/g, '').replace(/\n+/g, ' ');
       setVoiceState('ai-speaking');
-      speak(plainText);
-      const words = plainText.split(/\s+/).length;
-      setTimeout(() => setVoiceState('idle'), Math.max(2000, (words / 2.2) * 1000));
+      speak(plainText, () => setVoiceState('idle'));
     }
   };
 
