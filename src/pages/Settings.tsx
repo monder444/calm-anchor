@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
 import { useAuth } from '@/hooks/use-auth';
-import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Shield, Bell, Ghost, AlertTriangle, RotateCcw, LogOut, ChevronRight, Sun, Moon, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -77,12 +78,24 @@ export default function SettingsPage() {
 
         {/* Privacy */}
         <Section title="Privacy">
-          <SettingRow
-            icon={<Ghost className="w-5 h-5 text-accent" />}
-            label="Ghost Mode"
-            value={app.ghostMode ? 'On' : 'Off'}
-            onClick={() => app.setGhostMode(!app.ghostMode)}
-          />
+          <div className="flex items-center">
+            <SettingRow
+              icon={<Ghost className="w-5 h-5 text-accent" />}
+              label="Ghost Mode"
+              value={app.ghostMode ? 'On' : 'Off'}
+              onClick={() => app.setGhostMode(!app.ghostMode)}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="pr-4 -ml-2">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground/60" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-[200px] text-xs">
+                Hides mental-health labels and changes the browser tab title for privacy when others might see your screen.
+              </TooltipContent>
+            </Tooltip>
+          </div>
           {app.ghostMode && (
             <div className="px-5 py-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
