@@ -54,7 +54,11 @@ export default function Auth() {
       const { error } = await signUp(email, password, displayName);
       setSubmitting(false);
       if (error) { toast.error(error.message); return; }
-      toast.success('Check your email to confirm your account');
+      toast.success('Account created! Signing you in…');
+      // Auto-confirm is enabled, so sign in immediately
+      const { error: signInError } = await signIn(email, password);
+      if (signInError) { toast.error(signInError.message); return; }
+      navigate('/home');
       return;
     }
 
