@@ -1,34 +1,31 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Play, Pause, RotateCcw, Wind, Droplets, Footprints } from 'lucide-react';
 
 const copingCards = [
   {
     id: 'box-breathing',
-    emoji: '🫁',
+    icon: Wind,
     title: '2-min Box Breathing',
     desc: 'Breathe in 4s, hold 4s, out 4s, hold 4s. Repeat.',
     duration: 120,
-    color: 'primary',
     steps: ['Breathe in… 4 seconds', 'Hold… 4 seconds', 'Breathe out… 4 seconds', 'Hold… 4 seconds'],
   },
   {
     id: 'cold-water',
-    emoji: '🧊',
+    icon: Droplets,
     title: 'Cold Water Splash',
-    desc: 'Splash cold water on your face and wrists. The shock activates your dive reflex and calms your heart rate.',
+    desc: 'Splash cold water on your face and wrists to calm your heart rate.',
     duration: 60,
-    color: 'primary',
     steps: ['Go to a sink', 'Splash cold water on face', 'Hold cold water on wrists', 'Take a slow breath'],
   },
   {
     id: 'walk',
-    emoji: '🚶',
+    icon: Footprints,
     title: '5-minute Walk',
-    desc: 'Walk slowly and notice your feet touching the ground. Count your steps if it helps.',
+    desc: 'Walk slowly and notice your feet touching the ground.',
     duration: 300,
-    color: 'primary',
     steps: ['Stand up slowly', 'Walk at a gentle pace', 'Feel each footstep', 'Notice your surroundings'],
   },
 ];
@@ -73,8 +70,8 @@ export default function Nudge() {
                 className="w-full glass-card rounded-3xl p-6 text-left"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl">
-                    {card.emoji}
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <card.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-foreground">{card.title}</div>
@@ -124,7 +121,9 @@ function ActiveCopingCard({ card, onClose }: { card: typeof copingCards[0]; onCl
       className="glass-card rounded-3xl p-6 glow-primary"
     >
       <div className="flex items-center gap-3 mb-5">
-        <span className="text-2xl">{card.emoji}</span>
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <card.icon className="w-5 h-5 text-primary" />
+        </div>
         <h3 className="font-semibold text-foreground flex-1 font-display">{card.title}</h3>
         <button onClick={onClose} className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">Close</button>
       </div>

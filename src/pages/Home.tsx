@@ -97,21 +97,28 @@ export default function Home() {
                 {state?.description || 'You\'re in a good place right now.'}
               </p>
             </div>
-            {/* Mini stress gauge */}
+            {/* Wellness gauge — higher = better */}
             <div className="w-14 h-14 relative">
-              <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
-                <circle cx="18" cy="18" r="14" fill="none" stroke="hsla(var(--muted), 0.3)" strokeWidth="3" />
-                <circle
-                  cx="18" cy="18" r="14" fill="none"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="3"
-                  strokeDasharray={`${(state?.stressIndex ?? 25) * 0.88} 88`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
-                {state?.stressIndex ?? 25}%
-              </span>
+              {(() => {
+                const wellness = Math.max(0, Math.min(100, 100 - (state?.stressIndex ?? 10)));
+                return (
+                  <>
+                    <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
+                      <circle cx="18" cy="18" r="14" fill="none" stroke="hsla(var(--muted), 0.3)" strokeWidth="3" />
+                      <circle
+                        cx="18" cy="18" r="14" fill="none"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth="3"
+                        strokeDasharray={`${wellness * 0.88} 88`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
+                      {wellness}%
+                    </span>
+                  </>
+                );
+              })()}
             </div>
           </div>
           {/* Status chips */}
