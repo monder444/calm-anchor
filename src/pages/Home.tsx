@@ -100,7 +100,7 @@ export default function Home() {
             {/* Wellness gauge — higher = better */}
             <div className="w-14 h-14 relative">
               {(() => {
-                const wellness = Math.max(0, Math.min(100, 100 - (state?.stressIndex ?? 10)));
+                const wellness = Math.round(Math.max(0, Math.min(100, 100 - (state?.stressIndex ?? 10))));
                 return (
                   <>
                     <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90">
