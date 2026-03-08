@@ -105,7 +105,7 @@ export default function Anchor() {
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg ${
                   isDone ? 'bg-primary/15' : 'bg-muted/50'
                 }`}>
-                  {isDone ? <Check className="w-5 h-5 text-primary" /> : task.emoji}
+                  {isDone ? <Check className="w-5 h-5 text-primary" /> : <task.icon className="w-5 h-5 text-muted-foreground" />}
                 </div>
                 <div className="flex-1">
                   <div className={`font-semibold text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
