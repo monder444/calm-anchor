@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Anchor AI Calm Spectrum */
+    /* Anchor AI Calm Spectrum — Dark (default) */
     --background: 237 28% 14%;
     --foreground: 220 20% 92%;
 
@@ -53,6 +53,53 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 237 20% 25%;
     --sidebar-ring: 184 100% 50%;
+  }
+
+  .light {
+    --background: 220 20% 96%;
+    --foreground: 237 28% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 237 28% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 237 28% 14%;
+
+    --primary: 184 100% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 271 76% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 90%;
+    --muted-foreground: 220 15% 40%;
+
+    --accent: 271 76% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --amber: 45 100% 45%;
+    --amber-foreground: 237 28% 10%;
+
+    --teal: 184 100% 38%;
+    --violet: 271 76% 53%;
+    --indigo-deep: 220 20% 96%;
+    --indigo-light: 220 15% 90%;
+
+    --border: 220 15% 85%;
+    --input: 220 15% 85%;
+    --ring: 184 100% 38%;
+
+    --sidebar-background: 220 20% 94%;
+    --sidebar-foreground: 237 28% 14%;
+    --sidebar-primary: 184 100% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 271 76% 53%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 15% 85%;
+    --sidebar-ring: 184 100% 38%;
   }
 }
 
