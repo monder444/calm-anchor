@@ -88,7 +88,9 @@ export default function Home() {
         >
           <div className="flex items-center gap-2 mb-2">
             <Activity className={`w-4 h-4 ${style.text}`} />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">State of Mind</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+              {app.ghostMode ? 'Status' : 'State of Mind'}
+            </span>
           </div>
           <h2 className={`text-2xl font-display font-bold ${style.text} mb-1.5`}>
             {state?.label || 'Balanced'}
@@ -120,8 +122,12 @@ export default function Home() {
               <Shield className="w-8 h-8 text-amber" />
             </div>
             <div className="text-left">
-              <div className="text-xl font-display font-bold text-foreground">Panic Shield</div>
-              <div className="text-sm text-muted-foreground mt-0.5">Tap for instant support</div>
+              <div className="text-xl font-display font-bold text-foreground">
+                {app.ghostMode ? 'Quick Action' : 'Panic Shield'}
+              </div>
+              <div className="text-sm text-muted-foreground mt-0.5">
+                {app.ghostMode ? 'Tap to start' : 'Tap for instant support'}
+              </div>
             </div>
           </div>
         </motion.button>

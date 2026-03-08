@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageCircleHeart } from 'lucide-react';
+import { useAppState } from '@/lib/app-state';
 
 const navItems = [
-  { icon: '🏠', label: 'Home', route: '/home' },
-  { icon: '📷', label: 'Scan', route: '/vibescan' },
-  { icon: '🌱', label: 'Anchor', route: '/anchor' },
-  { icon: '💭', label: 'Nudge', route: '/nudge' },
+  { icon: '🏠', label: 'Home', ghostLabel: 'Home', route: '/home' },
+  { icon: '📷', label: 'Scan', ghostLabel: 'Camera', route: '/vibescan' },
+  { icon: '🌱', label: 'Anchor', ghostLabel: 'Tasks', route: '/anchor' },
+  { icon: '💭', label: 'Nudge', ghostLabel: 'Notes', route: '/nudge' },
 ];
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { ghostMode } = useAppState();
 
   return (
     <div className="px-6 pb-4 relative z-10">
@@ -28,7 +30,7 @@ export default function BottomNav() {
               }`}
             >
               <span className="text-xl">{item.icon}</span>
-              <span className="text-[10px] font-semibold">{item.label}</span>
+              <span className="text-[10px] font-semibold">{ghostMode ? item.ghostLabel : item.label}</span>
             </motion.button>
           );
         })}
@@ -41,7 +43,7 @@ export default function BottomNav() {
           }`}
         >
           <MessageCircleHeart className="w-5 h-5" />
-          <span className="text-[10px] font-semibold">Therapist</span>
+          <span className="text-[10px] font-semibold">{ghostMode ? 'Chat' : 'Therapist'}</span>
         </motion.button>
       </div>
     </div>
