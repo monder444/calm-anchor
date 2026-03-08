@@ -48,7 +48,17 @@ export default function SettingsPage() {
             }}
           />
           <div className="px-5 py-4">
-            <label className="text-sm text-muted-foreground mb-3 block font-medium">Sensitivity (1-5)</label>
+            <div className="flex items-center gap-2 mb-3">
+              <label className="text-sm text-muted-foreground font-medium">Sensitivity (1-5)</label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button><Info className="w-3.5 h-3.5 text-muted-foreground/60" /></button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-xs">
+                  Controls how easily stress states are detected. Level 1 requires strong signals; level 5 reacts to subtle changes. Start at 3 and adjust based on your experience.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
                 <motion.button
@@ -63,6 +73,11 @@ export default function SettingsPage() {
                 </motion.button>
               ))}
             </div>
+            <p className="text-[11px] text-muted-foreground/70 mt-2">
+              {app.sensitivity <= 2 ? 'Low — fewer alerts, only strong signals trigger detection' :
+               app.sensitivity >= 4 ? 'High — more responsive, reacts to subtle changes' :
+               'Balanced — recommended for most users'}
+            </p>
           </div>
         </Section>
 
