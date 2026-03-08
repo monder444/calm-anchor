@@ -69,7 +69,10 @@ export default function Onboarding() {
             <MissionStep onSelect={(concern) => { app.setPrimaryConcern(concern); next(); }} />
           )}
           {currentStep === 'pulse' && (
-            <PulseStep onNext={() => { app.setWearableConnected(true); next(); }} onSkip={next} />
+            <WearableSetup
+              onComplete={(connected) => { app.setWearableConnected(connected); next(); }}
+              showSkip
+            />
           )}
           {currentStep === 'vibescan' && (
             <VibeScanIntroStep onNext={next} />

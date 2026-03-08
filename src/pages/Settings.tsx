@@ -88,6 +88,11 @@ export default function SettingsPage() {
           </div>
         </Section>
 
+        {/* Wearable */}
+        <Section title="Wearable">
+          <WearableSetup onComplete={(c) => app.setWearableConnected(c)} showSkip={false} compact />
+        </Section>
+
         {/* Appearance */}
         <Section title="Appearance">
           <SettingRow
