@@ -53,7 +53,7 @@ export default function Home() {
             onClick={() => setProfileOpen(true)}
           >
             <Avatar className="w-12 h-12 border-2 border-primary/20 shadow-lg">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} className="object-cover" />}
               <AvatarFallback className="bg-primary/15 text-primary text-sm font-bold">
                 {initials}
               </AvatarFallback>
