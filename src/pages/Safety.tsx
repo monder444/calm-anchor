@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, AlertTriangle, ExternalLink } from 'lucide-react';
 
-const crisisNumbers = [
+const crisisNumbers: { country: string; name: string; number?: string; url?: string }[] = [
   { country: 'US', name: 'National Suicide Prevention Lifeline', number: '988' },
   { country: 'US', name: 'Crisis Text Line', number: 'Text HOME to 741741' },
   { country: 'UK', name: 'Samaritans', number: '116 123' },
   { country: 'EU', name: 'European Emergency', number: '112' },
-  { country: 'INT', name: 'International Association for Suicide Prevention', number: 'https://www.iasp.info/resources/Crisis_Centres/' },
+  { country: 'INT', name: 'International Association for Suicide Prevention', url: 'https://www.iasp.info/resources/Crisis_Centres/' },
 ];
 
 export default function Safety() {
@@ -60,7 +60,18 @@ export default function Safety() {
                   <div className="text-sm font-semibold text-foreground">{line.name}</div>
                   <div className="text-xs text-muted-foreground">{line.country}</div>
                 </div>
-                <span className="text-sm text-primary font-semibold">{line.number}</span>
+                {line.url ? (
+                  <a
+                    href={line.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl btn-premium text-xs font-semibold text-primary-foreground"
+                  >
+                    Visit <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <span className="text-sm text-primary font-semibold shrink-0">{line.number}</span>
+                )}
               </motion.div>
             ))}
           </div>
