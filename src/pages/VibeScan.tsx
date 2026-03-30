@@ -1,35 +1,139 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { classifyState, generateMockSnapshot } from '@/lib/stress-engine';
 import { ArrowLeft, Camera, VideoOff } from 'lucide-react';
+import type { StressClassification } from '@/lib/stress-engine';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const messages = [
   { time: 10, text: 'Connecting to your rhythm…' },
-  { time: 20, text: 'I see you. Analyzing physiological markers…' },
+  { time: 20, text: 'I see you. Analyzing facial markers…' },
   { time: 30, text: 'Almost there. Keep your shoulders soft.' },
 ];
+
+function captureFrame(video: HTMLVideoElement): string | null {
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 480;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Return base64 without the data URL prefix
+  return canvas.toDataURL('image/jpeg', 0.7).split(',')[1] || null;
+}
+
+function mapAIResponseToClassification(ai: {
+  state: string;
+  confidence: number;
+  fear: number;
+  tension: number;
+  flatAffect: number;
+  relaxed: number;
+  description: string;
+}): StressClassification {
+  const state = (['panic', 'anxiety', 'depression', 'baseline'].includes(ai.state)
+    ? ai.state
+    : 'baseline') as StressClassification['state'];
+
+  const labels: Record<string, { label: string; color: StressClassification['color'] }> = {
+    panic: { label: 'High Alert', color: 'amber' },
+    anxiety: { label: 'Elevated', color: 'violet' },
+    depression: { label: 'Low Energy', color: 'violet' },
+    baseline: { label: 'Balanced', color: 'teal' },
+  };
+
+  const stressIndexMap: Record<string, number> = {
+    panic: Math.min(100, 70 + ai.fear * 30),
+    anxiety: Math.min(70, 40 + ai.tension * 30),
+    depression: Math.min(50, 20 + ai.flatAffect * 30),
+    baseline: Math.max(0, 20 - ai.relaxed * 20),
+  };
+
+  return {
+    state,
+    confidence: ai.confidence,
+    stressIndex: stressIndexMap[state] ?? 10,
+    label: labels[state]?.label ?? 'Balanced',
+    description: ai.description || 'Analysis complete.',
+    color: labels[state]?.color ?? 'teal',
+  };
+}
 
 export default function VibeScan() {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const liveVideoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const navigate = useNavigate();
   const app = useAppState();
+  const { toast } = useToast();
 
-  const currentMessage = messages.find((m, i) => {
-    const next = messages[i + 1];
-    return progress <= (next?.time ?? 31);
-  })?.text || messages[0].text;
+  const currentMessage = analyzing
+    ? 'Analyzing your facial expression with AI…'
+    : messages.find((m, i) => {
+        const next = messages[i + 1];
+        return progress <= (next?.time ?? 31);
+      })?.text || messages[0].text;
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
-  };
+  }, []);
+
+  const analyzeFace = useCallback(async () => {
+    // Capture from whichever video element has the stream
+    const videoEl = liveVideoRef.current || videoRef.current;
+    if (!videoEl || !streamRef.current) {
+      toast({ title: 'Camera error', description: 'Could not capture frame.', variant: 'destructive' });
+      return;
+    }
+
+    const base64 = captureFrame(videoEl);
+    if (!base64) {
+      toast({ title: 'Capture error', description: 'Failed to capture frame from camera.', variant: 'destructive' });
+      return;
+    }
+
+    setAnalyzing(true);
+    stopCamera();
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-face', {
+        body: { imageBase64: base64 },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const classification = mapAIResponseToClassification(data);
+      app.setCurrentState(classification);
+    } catch (err) {
+      console.error('Face analysis failed:', err);
+      toast({
+        title: 'Analysis failed',
+        description: 'Could not analyze face. Using fallback assessment.',
+        variant: 'destructive',
+      });
+      // Fallback to baseline
+      app.setCurrentState({
+        state: 'baseline',
+        confidence: 0.5,
+        stressIndex: 15,
+        label: 'Balanced',
+        description: 'Could not complete facial analysis. Defaulting to balanced state.',
+        color: 'teal',
+      });
+    } finally {
+      setAnalyzing(false);
+      setDone(true);
+    }
+  }, [app, stopCamera, toast]);
 
   const handleStartScan = async () => {
     setCameraError(null);
@@ -59,22 +163,18 @@ export default function VibeScan() {
       setProgress(p => {
         if (p >= 30) {
           clearInterval(interval);
-          stopCamera();
-          const snapshot = generateMockSnapshot();
-          const classification = classifyState(snapshot, undefined, undefined, app.sensitivity);
-          app.setCurrentState(classification);
-          setDone(true);
+          analyzeFace();
           return 30;
         }
         return p + 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [scanning]);
+  }, [scanning, analyzeFace]);
 
   useEffect(() => {
     return () => stopCamera();
-  }, []);
+  }, [stopCamera]);
 
   const state = app.currentState;
 
@@ -99,7 +199,7 @@ export default function VibeScan() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
         <AnimatePresence mode="wait">
-          {!scanning && !done && (
+          {!scanning && !done && !analyzing && (
             <motion.div key="start" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
               <div className="relative w-48 h-48 mx-auto mb-8">
                 <motion.div
@@ -118,7 +218,7 @@ export default function VibeScan() {
               </div>
               <h2 className="text-2xl font-display font-bold text-foreground mb-3">Ready to Scan</h2>
               <p className="text-muted-foreground mb-8 max-w-xs leading-relaxed">
-                Position your face within the oval. The scan takes 30 seconds.
+                Position your face within the oval. AI will analyze your facial expression after a 30-second scan.
               </p>
               {cameraError && (
                 <div className="flex items-center gap-2 text-destructive text-sm mb-4 max-w-xs mx-auto">
@@ -136,12 +236,13 @@ export default function VibeScan() {
             </motion.div>
           )}
 
-          {scanning && !done && (
+          {(scanning || analyzing) && !done && (
             <motion.div key="scanning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
               <div className="relative w-56 h-56 mx-auto mb-8">
                 <div className="absolute inset-10 rounded-full overflow-hidden z-10">
                   <video
                     ref={el => {
+                      liveVideoRef.current = el;
                       if (el && streamRef.current) {
                         el.srcObject = streamRef.current;
                         el.play().catch(() => {});
@@ -170,13 +271,15 @@ export default function VibeScan() {
                   <motion.div
                     className="h-full rounded-full"
                     style={{
-                      width: `${(progress / 30) * 100}%`,
+                      width: analyzing ? '100%' : `${(progress / 30) * 100}%`,
                       background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))',
                     }}
                   />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">{progress}s / 30s</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {analyzing ? 'Processing…' : `${progress}s / 30s`}
+              </p>
               <motion.p
                 key={currentMessage}
                 initial={{ opacity: 0, y: 10 }}
