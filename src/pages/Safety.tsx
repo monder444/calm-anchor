@@ -60,7 +60,18 @@ export default function Safety() {
                   <div className="text-sm font-semibold text-foreground">{line.name}</div>
                   <div className="text-xs text-muted-foreground">{line.country}</div>
                 </div>
-                <span className="text-sm text-primary font-semibold">{line.number}</span>
+                {line.url ? (
+                  <a
+                    href={line.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl btn-premium text-xs font-semibold text-primary-foreground"
+                  >
+                    Visit <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <span className="text-sm text-primary font-semibold shrink-0">{line.number}</span>
+                )}
               </motion.div>
             ))}
           </div>
