@@ -7,7 +7,7 @@ const crisisNumbers = [
   { country: 'US', name: 'Crisis Text Line', number: 'Text HOME to 741741' },
   { country: 'UK', name: 'Samaritans', number: '116 123' },
   { country: 'EU', name: 'European Emergency', number: '112' },
-  { country: 'INT', name: 'International Association for Suicide Prevention', number: 'https://www.iasp.info/resources/Crisis_Centres/' },
+  { country: 'INT', name: 'International Association for Suicide Prevention', url: 'https://www.iasp.info/resources/Crisis_Centres/' },
 ];
 
 export default function Safety() {
