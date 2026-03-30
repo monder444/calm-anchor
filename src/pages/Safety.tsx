@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, AlertTriangle, ExternalLink } from 'lucide-react';
 
-const crisisNumbers = [
+const crisisNumbers: { country: string; name: string; number?: string; url?: string }[] = [
   { country: 'US', name: 'National Suicide Prevention Lifeline', number: '988' },
   { country: 'US', name: 'Crisis Text Line', number: 'Text HOME to 741741' },
   { country: 'UK', name: 'Samaritans', number: '116 123' },
