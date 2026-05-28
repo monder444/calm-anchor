@@ -2,14 +2,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '@/lib/app-state';
-import { ArrowLeft, Camera, VideoOff } from 'lucide-react';
-import type { StressClassification } from '@/lib/stress-engine';
+import { ArrowLeft, Camera, VideoOff, ChevronDown } from 'lucide-react';
+import type { StressClassification, FaceBiometricSummary } from '@/lib/stress-engine';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  getFaceLandmarker,
+  newAggregate,
+  ingestSample,
+  finalize,
+  type SampleAggregate,
+} from '@/lib/face-biometrics';
 
 const messages = [
-  { time: 10, text: 'Connecting to your rhythm…' },
-  { time: 20, text: 'I see you. Analyzing facial markers…' },
+  { time: 10, text: 'Tracking facial landmarks…' },
+  { time: 20, text: 'Measuring micro-expressions…' },
   { time: 30, text: 'Almost there. Keep your shoulders soft.' },
 ];
 
@@ -20,7 +27,6 @@ function captureFrame(video: HTMLVideoElement): string | null {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  // Return base64 without the data URL prefix
   return canvas.toDataURL('image/jpeg', 0.7).split(',')[1] || null;
 }
 
@@ -32,6 +38,7 @@ function mapAIResponseToClassification(ai: {
   flatAffect: number;
   relaxed: number;
   description: string;
+  biometrics?: FaceBiometricSummary;
 }): StressClassification {
   const state = (['panic', 'anxiety', 'depression', 'baseline'].includes(ai.state)
     ? ai.state
@@ -58,6 +65,7 @@ function mapAIResponseToClassification(ai: {
     label: labels[state]?.label ?? 'Balanced',
     description: ai.description || 'Analysis complete.',
     color: labels[state]?.color ?? 'teal',
+    biometrics: ai.biometrics,
   };
 }
 
@@ -67,15 +75,19 @@ export default function VibeScan() {
   const [done, setDone] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [showBiometrics, setShowBiometrics] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const aggRef = useRef<SampleAggregate | null>(null);
+  const rafRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const app = useAppState();
   const { toast } = useToast();
 
   const currentMessage = analyzing
-    ? 'Analyzing your facial expression with AI…'
+    ? 'Fusing biometrics with AI analysis…'
     : messages.find((m, i) => {
         const next = messages[i + 1];
         return progress <= (next?.time ?? 31);
@@ -84,10 +96,13 @@ export default function VibeScan() {
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   }, []);
 
   const analyzeFace = useCallback(async () => {
-    // Capture from whichever video element has the stream
     const videoEl = liveVideoRef.current || videoRef.current;
     if (!videoEl || !streamRef.current) {
       toast({ title: 'Camera error', description: 'Could not capture frame.', variant: 'destructive' });
@@ -100,12 +115,14 @@ export default function VibeScan() {
       return;
     }
 
+    const biometrics = aggRef.current ? finalize(aggRef.current) : undefined;
+
     setAnalyzing(true);
     stopCamera();
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-face', {
-        body: { imageBase64: base64 },
+        body: { imageBase64: base64, biometrics },
       });
 
       if (error) throw error;
@@ -120,7 +137,6 @@ export default function VibeScan() {
         description: 'Could not analyze face. Using fallback assessment.',
         variant: 'destructive',
       });
-      // Fallback to baseline
       app.setCurrentState({
         state: 'baseline',
         confidence: 0.5,
@@ -128,6 +144,7 @@ export default function VibeScan() {
         label: 'Balanced',
         description: 'Could not complete facial analysis. Defaulting to balanced state.',
         color: 'teal',
+        biometrics,
       });
     } finally {
       setAnalyzing(false);
@@ -138,6 +155,9 @@ export default function VibeScan() {
   const handleStartScan = async () => {
     setCameraError(null);
     try {
+      // Warm up FaceLandmarker in parallel with camera
+      getFaceLandmarker().catch(err => console.warn('FaceLandmarker init failed:', err));
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 } },
         audio: false,
@@ -147,6 +167,7 @@ export default function VibeScan() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      aggRef.current = newAggregate();
       setScanning(true);
     } catch (err) {
       if (err instanceof Error && err.name === 'NotAllowedError') {
@@ -156,6 +177,69 @@ export default function VibeScan() {
       }
     }
   };
+
+  // Landmark detection loop
+  useEffect(() => {
+    if (!scanning || analyzing) return;
+    let cancelled = false;
+    let landmarker: Awaited<ReturnType<typeof getFaceLandmarker>> | null = null;
+
+    (async () => {
+      try {
+        landmarker = await getFaceLandmarker();
+      } catch (e) {
+        console.warn('FaceLandmarker not available; running without biometrics', e);
+        return;
+      }
+      if (cancelled) return;
+
+      const loop = () => {
+        if (cancelled) return;
+        const v = liveVideoRef.current;
+        if (v && v.readyState >= 2 && landmarker && aggRef.current) {
+          try {
+            const result = landmarker.detectForVideo(v, performance.now());
+            ingestSample(aggRef.current, result);
+
+            // Draw overlay dots
+            const canvas = overlayCanvasRef.current;
+            if (canvas && result.faceLandmarks?.[0]) {
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'hsla(170, 70%, 60%, 0.7)';
+                // Subset of landmarks for clean look
+                const KEY = [33,133,159,145,362,263,386,374,10,152,234,454,168,6,197,1];
+                for (const i of KEY) {
+                  const p = result.faceLandmarks[0][i];
+                  // Mirror x because video is scale-x-[-1]
+                  const x = (1 - p.x) * canvas.width;
+                  const y = p.y * canvas.height;
+                  ctx.beginPath();
+                  ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
+            }
+          } catch (e) {
+            // Detection errors are non-fatal
+          }
+        }
+        rafRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+    })();
+
+    return () => {
+      cancelled = true;
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [scanning, analyzing]);
 
   useEffect(() => {
     if (!scanning) return;
@@ -183,7 +267,6 @@ export default function VibeScan() {
       <div className="ambient-orb w-80 h-80 bg-primary/20 -top-24 right-0" />
       <div className="ambient-orb w-64 h-64 bg-accent/15 bottom-20 -left-20" />
 
-      {/* Header */}
       <div className="px-6 pt-6 flex items-center gap-4 relative z-10">
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -218,7 +301,7 @@ export default function VibeScan() {
               </div>
               <h2 className="text-2xl font-display font-bold text-foreground mb-3">Ready to Scan</h2>
               <p className="text-muted-foreground mb-8 max-w-xs leading-relaxed">
-                Position your face within the oval. AI will analyze your facial expression after a 30-second scan.
+                Position your face within the oval. On-device FaceMesh tracks 468 landmarks while AI analyzes your expression.
               </p>
               {cameraError && (
                 <div className="flex items-center gap-2 text-destructive text-sm mb-4 max-w-xs mx-auto">
@@ -250,6 +333,10 @@ export default function VibeScan() {
                     }}
                     autoPlay playsInline muted
                     className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                  <canvas
+                    ref={overlayCanvasRef}
+                    className="absolute inset-0 w-full h-full pointer-events-none"
                   />
                 </div>
                 {[0, 1, 2].map((i) => (
@@ -307,6 +394,42 @@ export default function VibeScan() {
                 <p className="text-muted-foreground text-sm leading-relaxed">{state.description}</p>
               </div>
 
+              {state.biometrics && (
+                <div className="glass-card rounded-2xl mb-6 overflow-hidden text-left">
+                  <button
+                    onClick={() => setShowBiometrics(s => !s)}
+                    className="w-full px-5 py-3 flex items-center justify-between text-sm font-medium text-foreground"
+                  >
+                    <span>Biometric signals</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showBiometrics ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {showBiometrics && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="px-5 pb-4 space-y-2 text-xs text-muted-foreground"
+                      >
+                        <BioRow label="Eye openness" value={state.biometrics.eyeOpenness} />
+                        <BioRow label="Brow tension" value={state.biometrics.browTension} />
+                        <BioRow label="Jaw tension" value={state.biometrics.jawTension} />
+                        <BioRow label="Mouth tension" value={state.biometrics.mouthTension} />
+                        <BioRow label="Head tilt" value={state.biometrics.headTilt} />
+                        <div className="flex justify-between pt-1 border-t border-border/30">
+                          <span>Blink rate</span>
+                          <span className="text-foreground">{state.biometrics.blinkRate.toFixed(1)}/min</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Frames analyzed</span>
+                          <span className="text-foreground">{state.biometrics.samples}</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
               {state.state === 'panic' && (
                 <motion.button whileTap={{ scale: 0.95 }} onClick={() => navigate('/shield')}
                   className="w-full h-16 rounded-2xl bg-amber/15 border border-amber/25 text-amber font-bold text-lg glow-amber">
@@ -334,6 +457,23 @@ export default function VibeScan() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+function BioRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <span>{label}</span>
+        <span className="text-foreground">{(value * 100).toFixed(0)}%</span>
+      </div>
+      <div className="h-1 bg-muted/50 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full bg-primary/60"
+          style={{ width: `${Math.min(100, value * 100)}%` }}
+        />
       </div>
     </div>
   );
