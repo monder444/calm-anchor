@@ -25,6 +25,16 @@ const DEFAULT_BASELINE: UserBaseline = {
   avgMovement: 40,
 };
 
+export interface FaceBiometricSummary {
+  eyeOpenness: number;
+  browTension: number;
+  jawTension: number;
+  mouthTension: number;
+  headTilt: number;
+  blinkRate: number;
+  samples: number;
+}
+
 export interface StressClassification {
   state: MentalState;
   confidence: number;
@@ -32,6 +42,7 @@ export interface StressClassification {
   label: string;
   description: string;
   color: 'teal' | 'violet' | 'amber' | 'primary';
+  biometrics?: FaceBiometricSummary;
 }
 
 export function classifyState(
